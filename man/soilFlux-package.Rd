@@ -37,8 +37,8 @@ Estimating a Continuous Form of the Soil Water Retention Curve.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/hugo-rodrigues/soilFlux}
-  \item Report bugs at \url{https://github.com/hugo-rodrigues/soilFlux/issues}
+  \item \url{https://github.com/HugoMachadoRodrigues/soilFlux}
+  \item Report bugs at \url{https://github.com/HugoMachadoRodrigues/soilFlux/issues}
 }
 
 }

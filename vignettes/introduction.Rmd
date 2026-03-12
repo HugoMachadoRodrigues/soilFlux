@@ -17,7 +17,7 @@ vignette: >
 bibliography: references.bib
 ---
 
-```{r setup, include = FALSE}
+```{r setup, eval=FALSE, include = FALSE}
 knitr::opts_chunk$set(
   collapse  = TRUE,
   comment   = "#>",
@@ -27,7 +27,15 @@ knitr::opts_chunk$set(
 library(soilFlux)
 ```
 
+```{r setup-note, echo=FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
 # Overview
+
+> **Note:** All code in this vignette requires TensorFlow and Keras to be installed.
+> See `?soilFlux` for installation instructions. The outputs shown are representative
+> examples from a training run on the `swrc_example` dataset.
 
 The **soilFlux** package implements a physics-informed one-dimensional
 convolutional neural network (CNN1D-PINN) for estimating the complete
@@ -68,7 +76,7 @@ tensorflow::install_tensorflow()
 
 ## Minimal example
 
-```{r quickstart}
+```{r quickstart, eval=FALSE}
 library(soilFlux)
 
 # 1. Load and prepare data --------------------------------------------------
@@ -137,7 +145,7 @@ plot_swrc(dense, obs_points = test_df,
 
 The package automatically detects and corrects common unit issues:
 
-```{r units}
+```{r units, eval=FALSE}
 # Bulk density: if median > 10, assumes kg/m3 and converts to g/cm3
 fix_bd_units(c(1200, 1450, 1300))   # kg/m3 -> g/cm3
 
@@ -192,7 +200,7 @@ Plus two data-loss weights:
 | λ₁  | Wet-end data loss (pF ≤ 4.2) | 1 |
 | λ₂  | Dry-end data loss (pF > 4.2) | 10 |
 
-```{r lambdas}
+```{r lambdas, eval=FALSE}
 # Exact replication of Norouzi et al. (2025) Table 1
 norouzi_lambdas("norouzi")
 
@@ -204,7 +212,7 @@ norouzi_lambdas("smooth")
 
 # Saving and loading models
 
-```{r save-load}
+```{r save-load, eval=FALSE}
 # Save
 save_swrc_model(fit, dir = "./models", name = "model_5")
 
@@ -222,7 +230,7 @@ pred <- predict_swrc(fit2, newdata = test_df)
 
 ## SWRC curves
 
-```{r plot-swrc}
+```{r plot-swrc, eval=FALSE}
 dense <- predict_swrc_dense(fit, newdata = test_df, n_points = 500)
 
 plot_swrc(
@@ -238,7 +246,7 @@ plot_swrc(
 
 ## Predicted vs. observed
 
-```{r plot-pvo}
+```{r plot-pvo, eval=FALSE}
 pred_df <- data.frame(
   theta_n         = test_df$theta_n,
   theta_predicted = predict_swrc(fit, test_df),
@@ -249,7 +257,7 @@ plot_pred_obs(pred_df, group_col = "Texture")
 
 ## Training history
 
-```{r plot-history}
+```{r plot-history, eval=FALSE}
 plot_training_history(fit)
 ```
 
@@ -257,7 +265,7 @@ plot_training_history(fit)
 
 # Texture classification
 
-```{r texture}
+```{r texture, eval=FALSE}
 classify_texture(
   sand = c(70, 20, 10),
   silt = c(15, 50, 30),
@@ -275,7 +283,7 @@ texture_triangle(df, color_col = "Texture")
 
 # Session information
 
-```{r session}
+```{r session, eval=FALSE}
 sessionInfo()
 ```
 

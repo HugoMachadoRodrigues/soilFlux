@@ -24,6 +24,7 @@ Description: Implements a physics-informed one-dimensional convolutional
     classification, and publication-quality visualisation.
 License: MIT + file LICENSE
 Encoding: UTF-8
+SystemRequirements: Python (>= 3.8), TensorFlow (>= 2.14), Keras (>= 3.0)
 LazyData: true
 LazyDataCompression: xz
 Roxygen: list(markdown = TRUE)

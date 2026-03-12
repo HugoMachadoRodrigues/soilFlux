@@ -11,3 +11,6 @@
 ^pkgdown$
 ^\.DS_Store$
 ^\.gitignore$
+^\.claude$
+^cran-comments\.md$
+^CITATION\.cff$

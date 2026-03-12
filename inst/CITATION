@@ -1,0 +1,23 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "soilFlux: Physics-Informed Neural Networks for Soil Water Retention Curves",
+  author   = person("Hugo", "Rodrigues", email = "rodrigues.h@ufl.edu"),
+  year     = "2026",
+  note     = "R package version 0.1.0",
+  url      = "https://github.com/HugoMachadoRodrigues/soilFlux",
+  doi      = "10.5281/zenodo.18990856"
+)
+
+bibentry(
+  bibtype  = "Article",
+  title    = "Physics-Informed Neural Networks for Estimating a Continuous Form of the Soil Water Retention Curve",
+  author   = c(
+    person("Amir M.", "Norouzi"),
+    person("Gary W.", "Feyereisen"),
+    person("A. N.", "Papanicolaou"),
+    person("C. G.", "Wilson")
+  ),
+  journal  = "Journal of Hydrology",
+  year     = "2025",
+  note     = "The paper on which the CNN1D-PINN architecture is based"
+)
