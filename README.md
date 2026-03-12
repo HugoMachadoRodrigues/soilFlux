@@ -1,7 +1,7 @@
 # soilFlux <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/hugo-rodrigues/soilFlux/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/hugo-rodrigues/soilFlux/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/R-CMD-check.yaml)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
@@ -33,7 +33,7 @@ discrete look-up tables.
 
 ```r
 # Install from GitHub (development version)
-remotes::install_github("hugo-rodrigues/soilFlux")
+remotes::install_github("HugoMachadoRodrigues/soilFlux")
 
 # Install TensorFlow backend (once per machine)
 tensorflow::install_tensorflow()
