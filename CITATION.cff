@@ -6,6 +6,10 @@ version: 0.1.0
 date-released: 2025-03-12
 license: MIT
 repository-code: "https://github.com/HugoMachadoRodrigues/soilFlux"
+doi: "10.5281/zenodo.18990856"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.18990856"
 authors:
   - family-names: Rodrigues
     given-names: Hugo
