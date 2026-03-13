@@ -7,7 +7,7 @@ template:
       src: man/figures/logo.png
       alt: "soilFlux package logo"
     twitter:
-      creator: "@HugoMRodrigues"
+      creator: "@Hugo_MRodrigues"
       card: summary_large_image
 
 home:
