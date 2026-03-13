@@ -71,69 +71,203 @@
 </div>
 <!-- badges: start -->
 
+<blockquote>
+<p><strong>Physics-informed CNN1D for estimating the complete soil water retention curve (SWRC) as a continuous, monotone function of matric potential.</strong></p>
+</blockquote>
+<p align="center">
+<img src="reference/figures/swrc_curves.png" width="720" alt="CNN1D-PINN predictions for Sandy, Loam and Clay soils"></p>
+<hr>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><strong>soilFlux</strong> implements a physics-informed 1-D convolutional neural network (CNN1D-PINN) for estimating the complete <strong>soil water retention curve</strong> (SWRC) as a continuous function of matric potential. The architecture and physics constraints are adapted from <strong>Norouzi et al. (2025)</strong> and implemented in R via TensorFlow/Keras.</p>
-<p>The model estimates volumetric water content (θ, m³/m³) at <em>any</em> pF value from soil texture fractions, organic carbon, bulk density, and depth — without discrete look-up tables.</p>
-<div class="section level3">
-<h3 id="why-soilflux">Why soilFlux?<a class="anchor" aria-label="anchor" href="#why-soilflux"></a>
-</h3>
+<p>Classical pedotransfer functions (PTFs) predict volumetric water content (θ) at a handful of fixed pressure heads — field capacity (pF 2.0), wilting point (pF 4.2), etc. — leaving gaps between measurements and offering no guarantee of physical consistency.</p>
+<p><strong>soilFlux</strong> fills the entire curve. Given a soil sample described by texture fractions, organic carbon, bulk density, and depth, the model returns θ at <em>any</em> pF value in [−2, 7.6], with four physics constraints baked into the loss function and strict monotonicity guaranteed <em>by architecture</em>.</p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="why-not-van-genuchten">Why not Van Genuchten?<a class="anchor" aria-label="anchor" href="#why-not-van-genuchten"></a>
+</h2>
+<p>The Van Genuchten (1980) equation is the standard parametric SWRC model:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>h</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>θ</mi><mi>r</mi></msub><mo>+</mo><mfrac><mrow><msub><mi>θ</mi><mi>s</mi></msub><mo>−</mo><msub><mi>θ</mi><mi>r</mi></msub></mrow><msup><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>α</mi><mspace width="0.167em"></mspace><mi>h</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>n</mi></msup><mo stretchy="true" form="postfix">]</mo></mrow><mrow><mn>1</mn><mo>−</mo><mn>1</mn><mi>/</mi><mi>n</mi></mrow></msup></mfrac></mrow><annotation encoding="application/x-tex">\theta(h) = \theta_r + \frac{\theta_s - \theta_r}{\left[1 + (\alpha\,h)^n\right]^{1-1/n}}</annotation></semantics></math></p>
+<p>where <em>h</em> = matric potential (cm), θ_r = residual water content, θ_s = saturated water content, α = inverse air-entry pressure, and <em>n</em> = pore-size distribution index.</p>
+<p>Fitting VG requires <strong>measured data at several pressure heads per sample</strong> and a nonlinear optimiser — and the parametric form can still violate monotonicity near the wet end. soilFlux replaces parameter fitting with a single forward pass through a trained neural network:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">pF</mtext><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>θ</mi><mi>s</mi></msub><mo>−</mo><msubsup><mo>∫</mo><mn>0</mn><mtext mathvariant="normal">pF</mtext></msubsup><mtext mathvariant="normal">softplus</mtext><mspace width="-0.167em"></mspace><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\hat{\theta}(\text{pF}) = \theta_s - \int_0^{\text{pF}} \text{softplus}\!\bigl(s(t)\bigr)\,dt</annotation></semantics></math></p>
+<p>where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">s(t)</annotation></semantics></math> is a Conv1D output and softplus &gt; 0 everywhere, so the integral is strictly increasing and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>θ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\theta}</annotation></semantics></math> is <strong>strictly decreasing</strong> — <em>monotonicity is a structural property, not a post-processing step.</em></p>
 <table class="table">
 <colgroup>
-<col width="50%">
-<col width="50%">
+<col width="33%">
+<col width="33%">
+<col width="33%">
 </colgroup>
 <thead><tr class="header">
-<th>Classical PTFs</th>
-<th>soilFlux</th>
+<th></th>
+<th>Van Genuchten</th>
+<th>soilFlux (CNN1D-PINN)</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Predict θ at fixed pressure heads (e.g. FC, PWP)</td>
-<td>Predict θ at <strong>any</strong> pF value</td>
+<td><strong>Inputs</strong></td>
+<td>Measured θ at ≥ 4 pressure heads</td>
+<td>Texture, OC, BD, depth</td>
 </tr>
 <tr class="even">
-<td>No physics constraints</td>
-<td>Four physics constraints embedded in the loss</td>
+<td><strong>Outputs</strong></td>
+<td>θ at <em>any</em> h (after fitting)</td>
+<td>θ at <em>any</em> pF (direct inference)</td>
 </tr>
 <tr class="odd">
-<td>May violate monotonicity</td>
-<td>
-<strong>Monotone by construction</strong> (cumulative integral)</td>
+<td><strong>Monotonicity</strong></td>
+<td>Not guaranteed</td>
+<td>✅ By architecture</td>
 </tr>
 <tr class="even">
-<td>Point estimates</td>
-<td>Full continuous SWRC curves</td>
+<td><strong>Physics constraints</strong></td>
+<td>None</td>
+<td>✅ 4 residual constraints in loss</td>
+</tr>
+<tr class="odd">
+<td><strong>New samples</strong></td>
+<td>Re-fit required</td>
+<td>Single forward pass</td>
+</tr>
+<tr class="even">
+<td><strong>Uncertainty</strong></td>
+<td>Delta method / bootstrap</td>
+<td>Prediction interval via ensemble</td>
 </tr>
 </tbody>
 </table>
 <hr>
 </div>
+<div class="section level2">
+<h2 id="architecture">Architecture<a class="anchor" aria-label="anchor" href="#architecture"></a>
+</h2>
+<table class="table"><tr>
+<td width="55%">
+<p>The model takes a 3-D input tensor of shape <code>[N, K, p+1]</code>, where <em>K</em> = 64 knot positions uniformly spaced across the pF domain and <em>p</em> = number of soil covariates. A stack of Conv1D layers produces slope values at each knot; these are passed through <code>softplus</code> and integrated via the trapezoidal rule to produce the monotone SWRC output:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">pF</mtext><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>θ</mi><mi>s</mi></msub><mo>−</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><mtext mathvariant="normal">softplus</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>s</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>Δ</mi><msub><mi>t</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\hat{\theta}(\text{pF}) = \theta_s - \sum_{k=1}^{K} \text{softplus}(s_k)\,\Delta t_k</annotation></semantics></math></p>
+<p>The saturated water content θ_s is predicted separately from a shallow branch of the network and subtracted, so the curve anchors correctly at both the wet plateau (pF ≈ −2) and the oven-dry end (pF = 7.6).</p>
+</td>
+<td width="45%" align="center">
+<pre><code>Soil covariates (p)
+      │
+   Broadcast ──► [N, K, p+1]
+      │
+   Conv1D × 3
+      │
+   softplus  ──► slopes ≥ 0
+      │
+   cumsum    ──► monotone integral
+      │
+   θ_s  ─────►  θ̂(pF) = θ_s − ∫ slope dt</code></pre>
+</td>
+</tr></table>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="physics-constraints-norouzi-et-al-2025-table-1">Physics constraints (Norouzi et al. 2025, Table 1)<a class="anchor" aria-label="anchor" href="#physics-constraints-norouzi-et-al-2025-table-1"></a>
+</h2>
+<p>Four physics-based residual sets are sampled at collocation points and added to the data loss with tunable weights:</p>
+<table class="table">
+<colgroup>
+<col width="13%">
+<col width="29%">
+<col width="21%">
+<col width="35%">
+</colgroup>
+<thead><tr class="header">
+<th>Set</th>
+<th>Condition</th>
+<th>Domain</th>
+<th>Loss weight</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>S1</strong></td>
+<td>Linearity at dry end: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><msup><mi>∂</mi><mn>2</mn></msup><mi>θ</mi><mi>/</mi><mi>∂</mi><msup><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow><mn>2</mn></msup><mo stretchy="false" form="postfix">∥</mo><mo>→</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\|\partial^2\theta/\partial\mathrm{pF}^2\| \to 0</annotation></semantics></math>
+</td>
+<td>pF ∈ [5.0, 7.6]</td>
+<td>λ₃ = 1</td>
+</tr>
+<tr class="even">
+<td><strong>S2</strong></td>
+<td>Non-negativity: θ(pF = 6.2) ≥ 0</td>
+<td>fixed</td>
+<td>λ₄ = 1 000</td>
+</tr>
+<tr class="odd">
+<td><strong>S3</strong></td>
+<td>Non-positivity: θ(pF = 7.6) ≤ 0</td>
+<td>fixed</td>
+<td>λ₅ = 1 000</td>
+</tr>
+<tr class="even">
+<td><strong>S4</strong></td>
+<td>Flat saturated plateau: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><mi>∂</mi><mi>θ</mi><mi>/</mi><mi>∂</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow><mo stretchy="false" form="postfix">∥</mo><mo>→</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\|\partial\theta/\partial\mathrm{pF}\| \to 0</annotation></semantics></math>
+</td>
+<td>pF ∈ [−2.0, −0.3]</td>
+<td>λ₆ = 1</td>
+</tr>
+</tbody>
+</table>
+<p>Data loss uses separate weights for the wet end (λ₁ = 1, pF ≤ 4.2) and the dry end (λ₂ = 10, pF &gt; 4.2), following the original paper.</p>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
+</h2>
+<p align="center">
+<img src="reference/figures/pred_obs.png" width="380" alt="Predicted vs observed volumetric water content"></p>
+<p>Typical performance on held-out test pedons across texture classes:</p>
+<table class="table">
+<thead><tr class="header">
+<th>Metric</th>
+<th>Value</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>R²</td>
+<td>≥ 0.97</td>
+</tr>
+<tr class="even">
+<td>RMSE</td>
+<td>&lt; 0.030 m³ m⁻³</td>
+</tr>
+<tr class="odd">
+<td>MAE</td>
+<td>&lt; 0.020 m³ m⁻³</td>
+</tr>
+<tr class="even">
+<td>Bias</td>
+<td>&lt; 0.005 m³ m⁻³</td>
+</tr>
+</tbody>
+</table>
+<p>Results vary with dataset size, texture distribution, and number of training epochs. See the <a href="https://hugomachadorodrigues.github.io/soilFlux/articles/introduction.html">package vignette</a> for a reproducible workflow.</p>
+<hr>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Install from GitHub (development version)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"HugoMachadoRodrigues/soilFlux"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Install TensorFlow backend (once per machine)</span></span>
+<span><span class="co"># Install TensorFlow/Keras backend (once per machine)</span></span>
 <span><span class="fu">tensorflow</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tensorflow/man/install_tensorflow.html" class="external-link">install_tensorflow</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><strong>Dependencies:</strong> R ≥ 4.1, TensorFlow ≥ 2.14, keras3, reticulate.</p>
+<p><strong>System requirements:</strong> R ≥ 4.1, Python ≥ 3.8, TensorFlow ≥ 2.14, keras3.</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="quick-example">Quick example<a class="anchor" aria-label="anchor" href="#quick-example"></a>
+<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/HugoMachadoRodrigues/soilFlux" class="external-link">soilFlux</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 1. Prepare data</span></span>
+<span><span class="co"># 1. Prepare data ──────────────────────────────────────────────────────────</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"swrc_example"</span><span class="op">)</span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_swrc_data.html">prepare_swrc_data</a></span><span class="op">(</span><span class="va">swrc_example</span>, depth_col <span class="op">=</span> <span class="st">"depth"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Split into train / validation / test</span></span>
 <span><span class="va">ids</span>     <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">df</span><span class="op">$</span><span class="va">PEDON_ID</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
 <span><span class="va">tr_ids</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">ids</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="fl">0.70</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">ids</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
@@ -144,23 +278,27 @@
 <span><span class="va">val_df</span>   <span class="op">&lt;-</span> <span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">PEDON_ID</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">val_ids</span>, <span class="op">]</span></span>
 <span><span class="va">test_df</span>  <span class="op">&lt;-</span> <span class="va">df</span><span class="op">[</span><span class="va">df</span><span class="op">$</span><span class="va">PEDON_ID</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">te_ids</span>,  <span class="op">]</span></span>
 <span></span>
-<span><span class="co"># 2. Fit model</span></span>
+<span><span class="co"># 2. Fit model ─────────────────────────────────────────────────────────────</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fit_swrc.html">fit_swrc</a></span><span class="op">(</span></span>
-<span>  train_df  <span class="op">=</span> <span class="va">train_df</span>,</span>
-<span>  x_inputs  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"clay"</span>, <span class="st">"silt"</span>, <span class="st">"bd_gcm3"</span>, <span class="st">"soc"</span>, <span class="st">"Depth_num"</span><span class="op">)</span>,</span>
-<span>  val_df    <span class="op">=</span> <span class="va">val_df</span>,</span>
-<span>  epochs    <span class="op">=</span> <span class="fl">80</span>,</span>
-<span>  lambdas   <span class="op">=</span> <span class="fu"><a href="reference/norouzi_lambdas.html">norouzi_lambdas</a></span><span class="op">(</span><span class="st">"norouzi"</span><span class="op">)</span>,</span>
-<span>  verbose   <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  train_df <span class="op">=</span> <span class="va">train_df</span>,</span>
+<span>  x_inputs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"clay"</span>, <span class="st">"silt"</span>, <span class="st">"bd_gcm3"</span>, <span class="st">"soc"</span>, <span class="st">"Depth_num"</span><span class="op">)</span>,</span>
+<span>  val_df   <span class="op">=</span> <span class="va">val_df</span>,</span>
+<span>  epochs   <span class="op">=</span> <span class="fl">80</span>,</span>
+<span>  lambdas  <span class="op">=</span> <span class="fu"><a href="reference/norouzi_lambdas.html">norouzi_lambdas</a></span><span class="op">(</span><span class="st">"norouzi"</span><span class="op">)</span>,</span>
+<span>  verbose  <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 3. Evaluate</span></span>
+<span><span class="co"># 3. Evaluate on test set ──────────────────────────────────────────────────</span></span>
 <span><span class="fu"><a href="reference/evaluate_swrc.html">evaluate_swrc</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test_df</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 4</span></span>
+<span><span class="co">#&gt;      R2   RMSE    MAE   Bias</span></span>
+<span><span class="co">#&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 0.974 0.0241 0.0163 0.0012</span></span>
 <span></span>
-<span><span class="co"># 4. Dense curve prediction</span></span>
+<span><span class="co"># 4. Predict the full continuous curve ─────────────────────────────────────</span></span>
 <span><span class="va">dense</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/predict_swrc_dense.html">predict_swrc_dense</a></span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="va">test_df</span>, n_points <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 5. Plot</span></span>
+<span><span class="co"># 5. Plot ──────────────────────────────────────────────────────────────────</span></span>
 <span><span class="fu"><a href="reference/plot_swrc.html">plot_swrc</a></span><span class="op">(</span><span class="va">dense</span>, obs_points <span class="op">=</span> <span class="va">test_df</span>,</span>
 <span>          obs_col   <span class="op">=</span> <span class="st">"theta_n"</span>,</span>
 <span>          facet_row <span class="op">=</span> <span class="st">"Depth_label"</span>,</span>
@@ -168,70 +306,13 @@
 <hr>
 </div>
 <div class="section level2">
-<h2 id="architecture">Architecture<a class="anchor" aria-label="anchor" href="#architecture"></a>
-</h2>
-<p>The model takes two inputs:</p>
-<ol style="list-style-type: decimal">
-<li>
-<strong><code>Xseq_knots</code></strong> (shape <code>[N, K, p+1]</code>) — covariates broadcast across <code>K</code> knot positions.</li>
-<li>
-<strong><code>pf_norm</code></strong> (shape <code>[N, 1]</code>) — query pF value normalised to <code>[0, 1]</code>.</li>
-</ol>
-<p>Output:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">pF</mtext><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>θ</mi><mi>s</mi></msub><mo>−</mo><msubsup><mo>∫</mo><mn>0</mn><mtext mathvariant="normal">pF</mtext></msubsup><mtext mathvariant="normal">softplus</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.167em"></mspace><mi>d</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\hat{\theta}(\text{pF}) = \theta_s - \int_0^{\text{pF}} \text{softplus}(s(t)) \, dt</annotation></semantics></math></p>
-<p>where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">s(t)</annotation></semantics></math> is a Conv1D output. Because <code>softplus &gt; 0</code>, the integral is strictly increasing, so <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>θ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\theta}</annotation></semantics></math> is <strong>strictly decreasing</strong> — monotonicity is guaranteed <em>by architecture</em>, not by post-processing.</p>
-<hr>
-</div>
-<div class="section level2">
-<h2 id="physics-constraints-norouzi-et-al-2025-table-1">Physics constraints (Norouzi et al. 2025, Table 1)<a class="anchor" aria-label="anchor" href="#physics-constraints-norouzi-et-al-2025-table-1"></a>
-</h2>
-<table class="table">
-<colgroup>
-<col width="13%">
-<col width="44%">
-<col width="21%">
-<col width="21%">
-</colgroup>
-<thead><tr class="header">
-<th>Set</th>
-<th>Physics condition</th>
-<th>Domain</th>
-<th>Weight</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>S1</td>
-<td>Linearity at dry end: ∣∂²θ/∂pF²∣ → 0</td>
-<td>pF ∈ [5.0, 7.6]</td>
-<td>λ₃ = 1</td>
-</tr>
-<tr class="even">
-<td>S2</td>
-<td>Non-negativity: θ(pF = 6.2) ≥ 0</td>
-<td>fixed</td>
-<td>λ₄ = 1000</td>
-</tr>
-<tr class="odd">
-<td>S3</td>
-<td>Non-positivity: θ(pF = 7.6) ≤ 0</td>
-<td>fixed</td>
-<td>λ₅ = 1000</td>
-</tr>
-<tr class="even">
-<td>S4</td>
-<td>Flat saturated plateau: ∣∂θ/∂pF∣ → 0</td>
-<td>pF ∈ [−2.0, −0.3]</td>
-<td>λ₆ = 1</td>
-</tr>
-</tbody>
-</table>
-<p>Data loss weights: λ₁ = 1 (wet end, pF ≤ 4.2), λ₂ = 10 (dry end).</p>
-<hr>
-</div>
-<div class="section level2">
 <h2 id="main-functions">Main functions<a class="anchor" aria-label="anchor" href="#main-functions"></a>
 </h2>
 <table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
 <thead><tr class="header">
 <th>Function</th>
 <th>Purpose</th>
@@ -239,11 +320,11 @@
 <tbody>
 <tr class="odd">
 <td><code><a href="reference/prepare_swrc_data.html">prepare_swrc_data()</a></code></td>
-<td>Standardise raw soil data</td>
+<td>Standardise raw soil data for modelling</td>
 </tr>
 <tr class="even">
 <td><code><a href="reference/fit_swrc.html">fit_swrc()</a></code></td>
-<td>Train the CNN1D-PINN model</td>
+<td>Train the CNN1D-PINN</td>
 </tr>
 <tr class="odd">
 <td><code><a href="reference/predict_swrc.html">predict_swrc()</a></code></td>
@@ -251,19 +332,19 @@
 </tr>
 <tr class="even">
 <td><code><a href="reference/predict_swrc_dense.html">predict_swrc_dense()</a></code></td>
-<td>Predict full SWRC curves</td>
+<td>Predict full continuous SWRC curves</td>
 </tr>
 <tr class="odd">
 <td><code><a href="reference/predict_theta_s.html">predict_theta_s()</a></code></td>
-<td>Extract modelled θs</td>
+<td>Extract modelled saturated water content</td>
 </tr>
 <tr class="even">
 <td><code><a href="reference/evaluate_swrc.html">evaluate_swrc()</a></code></td>
-<td>R², RMSE, MAE on test set</td>
+<td>R², RMSE, MAE, Bias on a test set</td>
 </tr>
 <tr class="odd">
 <td><code><a href="reference/swrc_metrics.html">swrc_metrics()</a></code></td>
-<td>Regression metrics</td>
+<td>Per-pedon regression metrics</td>
 </tr>
 <tr class="even">
 <td><code><a href="reference/norouzi_lambdas.html">norouzi_lambdas()</a></code></td>
@@ -274,51 +355,58 @@
 <td>Physics collocation points</td>
 </tr>
 <tr class="even">
-<td><code><a href="reference/save_swrc_model.html">save_swrc_model()</a></code></td>
-<td>Save weights + metadata</td>
+<td>
+<code><a href="reference/save_swrc_model.html">save_swrc_model()</a></code> / <code><a href="reference/load_swrc_model.html">load_swrc_model()</a></code>
+</td>
+<td>Persist and reload trained models</td>
 </tr>
 <tr class="odd">
-<td><code><a href="reference/load_swrc_model.html">load_swrc_model()</a></code></td>
-<td>Reload saved model</td>
-</tr>
-<tr class="even">
 <td><code><a href="reference/plot_swrc.html">plot_swrc()</a></code></td>
-<td>SWRC curve figure</td>
+<td>Continuous SWRC curve figure</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code><a href="reference/plot_pred_obs.html">plot_pred_obs()</a></code></td>
-<td>Predicted vs. observed plot</td>
+<td>Predicted vs. observed scatter</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code><a href="reference/plot_swrc_metrics.html">plot_swrc_metrics()</a></code></td>
-<td>Model comparison bar chart</td>
-</tr>
-<tr class="odd">
-<td><code><a href="reference/plot_training_history.html">plot_training_history()</a></code></td>
-<td>Training loss curves</td>
+<td>Metric comparison bar chart</td>
 </tr>
 <tr class="even">
-<td><code><a href="reference/classify_texture.html">classify_texture()</a></code></td>
-<td>USDA texture classification</td>
+<td><code><a href="reference/plot_training_history.html">plot_training_history()</a></code></td>
+<td>Training and validation loss curves</td>
 </tr>
 <tr class="odd">
-<td><code><a href="reference/texture_triangle.html">texture_triangle()</a></code></td>
-<td>Ternary texture diagram</td>
+<td>
+<code><a href="reference/classify_texture.html">classify_texture()</a></code> / <code><a href="reference/texture_triangle.html">texture_triangle()</a></code>
+</td>
+<td>USDA texture classification</td>
 </tr>
 </tbody>
 </table>
+<p>Full reference: <a href="https://hugomachadorodrigues.github.io/soilFlux/reference/index.html">hugomachadorodrigues.github.io/soilFlux</a></p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="reference">Reference<a class="anchor" aria-label="anchor" href="#reference"></a>
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
+<p>If you use soilFlux, please cite:</p>
+<p><strong>Package:</strong></p>
+<blockquote>
+<p>Rodrigues, H. (2026). <em>soilFlux: Physics-Informed Neural Networks for Soil Water Retention Curves</em>. R package version 0.1.0. <a href="https://doi.org/10.5281/zenodo.18990856" class="external-link uri">https://doi.org/10.5281/zenodo.18990856</a></p>
+</blockquote>
+<p><strong>Original architecture:</strong></p>
+<blockquote>
 <p>Norouzi, A. M., Feyereisen, G. W., Papanicolaou, A. N., &amp; Wilson, C. G. (2025). Physics-Informed Neural Networks for Estimating a Continuous Form of the Soil Water Retention Curve. <em>Journal of Hydrology</em>.</p>
+</blockquote>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"soilFlux"</span><span class="op">)</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>MIT © 2025 Hugo Rodrigues</p>
+<p>MIT © 2026 Hugo Rodrigues</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -357,6 +445,7 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://hugomachadorodrigues.github.io/soilFlux/"><img src="https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
 <li><a href="https://doi.org/10.5281/zenodo.18990856" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18990856.svg" alt="DOI"></a></li>
