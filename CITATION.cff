@@ -13,8 +13,9 @@ identifiers:
 authors:
   - family-names: Rodrigues
     given-names: Hugo
-    email: rodrigues.h@ufl.edu
+    email: rodrigues.machado.hugo@gmail.com
     affiliation: University of Florida
+    orcid: "https://orcid.org/0000-0002-8070-8126"
 abstract: >
   Implements a physics-informed one-dimensional convolutional neural network
   (CNN1D-PINN) for estimating the complete soil water retention curve (SWRC)

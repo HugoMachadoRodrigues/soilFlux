@@ -1,0 +1,71 @@
+url: https://HugoMachadoRodrigues.github.io/soilFlux
+
+template:
+  bootstrap: 5
+  opengraph:
+    image:
+      src: man/figures/logo.png
+      alt: "soilFlux package logo"
+    twitter:
+      creator: "@HugoMRodrigues"
+      card: summary_large_image
+
+home:
+  title: "soilFlux — Physics-Informed SWRC Modelling"
+  description: >
+    Physics-informed CNN1D for estimating the complete soil water retention
+    curve as a continuous monotone function of matric potential.
+  image: man/figures/logo.png
+  image-alt: soilFlux hex sticker
+
+authors:
+  Hugo Rodrigues:
+    href: https://orcid.org/0000-0002-8070-8126
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    github:
+      icon: fab fa-github
+      href: https://github.com/HugoMachadoRodrigues/soilFlux
+      aria-label: GitHub
+
+reference:
+  - title: "Data preparation"
+    desc: "Standardise raw soil data for modelling"
+    contents: [prepare_swrc_data]
+  - title: "Model fitting"
+    desc: "Train the CNN1D-PINN"
+    contents: [fit_swrc, build_swrc_model, norouzi_lambdas, build_residual_sets]
+  - title: "Prediction"
+    desc: "Predict water content at specific or dense pF grids"
+    contents: [predict_swrc, predict_swrc_dense, predict_theta_s, predict.swrc_fit]
+  - title: "Evaluation & metrics"
+    desc: "Performance metrics and evaluation"
+    contents: [evaluate_swrc, swrc_metrics, swrc_metrics_by_group]
+  - title: "Visualisation"
+    desc: "Publication-quality plots"
+    contents: [plot_swrc, plot_pred_obs, plot_swrc_metrics, plot_training_history]
+  - title: "Texture"
+    desc: "USDA texture classification and triangle"
+    contents: [classify_texture, add_texture, texture_triangle]
+  - title: "Save / Load"
+    desc: "Persist and reload trained models"
+    contents: [save_swrc_model, load_swrc_model, swrc_model_exists]
+  - title: "Internal helpers"
+    desc: "Scaling, physics, utilities"
+    contents: [fit_minmax, apply_minmax, invert_minmax,
+               pf_from_head, head_from_pf, pf_normalize, head_normalize,
+               parse_depth, parse_depth_column, fix_bd_units, theta_unit_factor,
+               compute_physics_loss, residual_to_tensors,
+               make_obs_matrices, make_profile_array, make_train_step, safe_grad]
+  - title: "Data"
+    desc: "Example datasets"
+    contents: [swrc_example]
+
+footer:
+  structure:
+    left: developed_by
+    right: built_with

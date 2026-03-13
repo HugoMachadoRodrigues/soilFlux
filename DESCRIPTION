@@ -4,8 +4,9 @@ Version: 0.1.0
 Authors@R:
     person(
       "Hugo", "Rodrigues",
-      email = "rodrigues.h@ufl.edu",
-      role  = c("aut", "cre")
+      email = "rodrigues.machado.hugo@gmail.com",
+      role  = c("aut", "cre"),
+      comment = c(ORCID = "0000-0002-8070-8126")
     )
 Description: Implements a physics-informed one-dimensional convolutional
     neural network (CNN1D-PINN) for estimating the complete soil water
