@@ -1,6 +1,6 @@
 Package: soilFlux
 Title: Physics-Informed Neural Networks for Soil Water Retention Curves
-Version: 0.1.1
+Version: 0.1.2
 Authors@R:
     person(
       "Hugo", "Rodrigues",
