@@ -46,7 +46,7 @@ observations.
 \details{
 The dataset contains 120 unique profiles (\code{PEDON_ID}) across five
 depth intervals (0–5, 5–15, 15–30, 30–60, 60–100 cm) and eight
-matric-head points per depth (pF ≈ 0, 1, 1.5, 2, 2.5, 3, 4.2, 7).
+matric-head points per depth (pF approximately 0, 1, 1.5, 2, 2.5, 3, 4.2, 7).
 Profiles are evenly distributed across seven USDA texture classes.
 
 Water-content observations were generated with the van Genuchten

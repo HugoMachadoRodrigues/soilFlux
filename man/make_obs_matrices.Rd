@@ -36,7 +36,7 @@ or compatible structure) containing covariate columns, \code{matric_head},
 \item{pf_right}{Right boundary of the pF domain (default \code{7.6}).}
 
 \item{wet_split_cm}{Matric head threshold (cm) separating wet / dry end
-(default \code{4.2}, corresponding to pF ≈ 0.62).}
+(default \code{4.2}, corresponding to pF approximately 0.62).}
 
 \item{w_wet}{Sample weight for wet-end observations (default \code{1}).}
 

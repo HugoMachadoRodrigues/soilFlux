@@ -116,7 +116,7 @@ prepare_swrc_data <- function(df,
 #' @param pf_left      Left boundary of the pF domain (default `-2`).
 #' @param pf_right     Right boundary of the pF domain (default `7.6`).
 #' @param wet_split_cm Matric head threshold (cm) separating wet / dry end
-#'   (default `4.2`, corresponding to pF ≈ 0.62).
+#'   (default `4.2`, corresponding to pF approximately 0.62).
 #' @param w_wet        Sample weight for wet-end observations (default `1`).
 #' @param w_dry        Sample weight for dry-end observations (default `1`).
 #'
