@@ -165,53 +165,69 @@
 <hr>
 </div>
 <div class="section level2">
-<h2 id="physics-constraints-norouzi-et-al-2025-table-1">Physics constraints (Norouzi et al. 2025, Table 1)<a class="anchor" aria-label="anchor" href="#physics-constraints-norouzi-et-al-2025-table-1"></a>
+<h2 id="loss-function-norouzi-et-al-2025">Loss function (Norouzi et al. 2025)<a class="anchor" aria-label="anchor" href="#loss-function-norouzi-et-al-2025"></a>
 </h2>
-<p>Four physics-based residual sets are sampled at collocation points and added to the data loss with tunable weights:</p>
-<table class="table">
+<p>The total training loss combines a <strong>data term</strong> and four <strong>physics residual terms</strong>, each weighted by a tunable λ:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℒ</mi><mo>=</mo><munder><munder><mrow><msub><mi>λ</mi><mn>1</mn></msub><msub><mi>ℒ</mi><mtext mathvariant="normal">wet</mtext></msub><mo>+</mo><msub><mi>λ</mi><mn>2</mn></msub><msub><mi>ℒ</mi><mtext mathvariant="normal">dry</mtext></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">data loss</mtext></munder><mo>+</mo><munder><munder><mrow><msub><mi>λ</mi><mn>3</mn></msub><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>λ</mi><mn>4</mn></msub><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>2</mn></mrow></msub><mo>+</mo><msub><mi>λ</mi><mn>5</mn></msub><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>3</mn></mrow></msub><mo>+</mo><msub><mi>λ</mi><mn>6</mn></msub><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>4</mn></mrow></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">physics loss</mtext></munder></mrow><annotation encoding="application/x-tex">\mathcal{L} = \underbrace{\lambda_1 \mathcal{L}_{\text{wet}} + \lambda_2 \mathcal{L}_{\text{dry}}}_{\text{data loss}} + \underbrace{\lambda_3 \mathcal{L}_{S1} + \lambda_4 \mathcal{L}_{S2} + \lambda_5 \mathcal{L}_{S3} + \lambda_6 \mathcal{L}_{S4}}_{\text{physics loss}}</annotation></semantics></math></p>
+<div class="section level3">
+<h3 id="data-loss">Data loss<a class="anchor" aria-label="anchor" href="#data-loss"></a>
+</h3>
+<p>The observed data are split at pF = 4.2 (wilting point) and weighted separately to balance the large dynamic range of the curve:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mtext mathvariant="normal">wet</mtext></msub><mo>=</mo><mfrac><mn>1</mn><msub><mi>N</mi><mi>w</mi></msub></mfrac><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><mtext mathvariant="normal">wet</mtext></mrow></munder><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mi>θ</mi><mi>i</mi></msub><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>ℒ</mi><mtext mathvariant="normal">dry</mtext></msub><mo>=</mo><mfrac><mn>1</mn><msub><mi>N</mi><mi>d</mi></msub></mfrac><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><mtext mathvariant="normal">dry</mtext></mrow></munder><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mi>θ</mi><mi>i</mi></msub><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{\text{wet}} = \frac{1}{N_w}\sum_{i \in \text{wet}} \bigl(\hat\theta_i - \theta_i\bigr)^2, \qquad \mathcal{L}_{\text{dry}} = \frac{1}{N_d}\sum_{i \in \text{dry}} \bigl(\hat\theta_i - \theta_i\bigr)^2</annotation></semantics></math></p>
+<p>with λ₁ = 1, λ₂ = 10 — the dry end is up-weighted because observed values are close to zero and small absolute errors carry proportionally more weight.</p>
+</div>
+<div class="section level3">
+<h3 id="physics-residuals">Physics residuals<a class="anchor" aria-label="anchor" href="#physics-residuals"></a>
+</h3>
+<p>Collocation points {<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>j</mi></msub><annotation encoding="application/x-tex">t_j</annotation></semantics></math>} are sampled from each constraint domain at each training step. Gradients are computed via automatic differentiation (TensorFlow <code>GradientTape</code>).</p>
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="13%">
-<col width="29%">
-<col width="21%">
-<col width="35%">
+<col width="16%">
+<col width="46%">
+<col width="26%">
+<col width="10%">
 </colgroup>
 <thead><tr class="header">
 <th>Set</th>
-<th>Condition</th>
+<th>Residual loss</th>
 <th>Domain</th>
-<th>Loss weight</th>
+<th>λ</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><strong>S1</strong></td>
-<td>Linearity at dry end: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><msup><mi>∂</mi><mn>2</mn></msup><mi>θ</mi><mi>/</mi><mi>∂</mi><msup><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow><mn>2</mn></msup><mo stretchy="false" form="postfix">∥</mo><mo>→</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\|\partial^2\theta/\partial\mathrm{pF}^2\| \to 0</annotation></semantics></math>
-</td>
+<td>
+<strong>S1</strong> — linear dry end</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>1</mn></mrow></msub><mo>=</mo><mfrac displaystyle="true"><mn>1</mn><mi>M</mi></mfrac><msub><mo>∑</mo><mi>j</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac displaystyle="true"><mrow><msup><mi>∂</mi><mn>2</mn></msup><mover><mi>θ</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><msup><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow><mn>2</mn></msup></mrow></mfrac><msub><mo minsize="2.4" maxsize="2.4" stretchy="false" form="postfix">∥</mo><msub><mi>t</mi><mi>j</mi></msub></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mspace width="-0.167em"></mspace><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S1} = \dfrac{1}{M}\displaystyle\sum_j \left(\dfrac{\partial^2\hat\theta}{\partial \mathrm{pF}^2}\bigg\|_{t_j}\right)^{\!2}</annotation></semantics></math></td>
 <td>pF ∈ [5.0, 7.6]</td>
 <td>λ₃ = 1</td>
 </tr>
 <tr class="even">
-<td><strong>S2</strong></td>
-<td>Non-negativity: θ(pF = 6.2) ≥ 0</td>
-<td>fixed</td>
+<td>
+<strong>S2</strong> — non-negativity</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>2</mn></mrow></msub><mo>=</mo><mo>max</mo><mspace width="-0.167em"></mspace><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.167em"></mspace><mo>−</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mn>6.2</mn><mo stretchy="true" form="postfix">)</mo></mrow><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S2} = \max\!\bigl(0,\,-\hat\theta(6.2)\bigr)^2</annotation></semantics></math></td>
+<td>pF = 6.2</td>
 <td>λ₄ = 1 000</td>
 </tr>
 <tr class="odd">
-<td><strong>S3</strong></td>
-<td>Non-positivity: θ(pF = 7.6) ≤ 0</td>
-<td>fixed</td>
+<td>
+<strong>S3</strong> — non-positivity</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>3</mn></mrow></msub><mo>=</mo><mo>max</mo><mspace width="-0.167em"></mspace><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.167em"></mspace><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mn>7.6</mn><mo stretchy="true" form="postfix">)</mo></mrow><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S3} = \max\!\bigl(0,\,\hat\theta(7.6)\bigr)^2</annotation></semantics></math></td>
+<td>pF = 7.6</td>
 <td>λ₅ = 1 000</td>
 </tr>
 <tr class="even">
-<td><strong>S4</strong></td>
-<td>Flat saturated plateau: <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="postfix">∥</mo><mi>∂</mi><mi>θ</mi><mi>/</mi><mi>∂</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow><mo stretchy="false" form="postfix">∥</mo><mo>→</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\|\partial\theta/\partial\mathrm{pF}\| \to 0</annotation></semantics></math>
-</td>
+<td>
+<strong>S4</strong> — wet plateau</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>4</mn></mrow></msub><mo>=</mo><mfrac displaystyle="true"><mn>1</mn><mi>M</mi></mfrac><msub><mo>∑</mo><mi>j</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac displaystyle="true"><mrow><mi>∂</mi><mover><mi>θ</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow></mrow></mfrac><msub><mo minsize="2.4" maxsize="2.4" stretchy="false" form="postfix">∥</mo><msub><mi>t</mi><mi>j</mi></msub></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mspace width="-0.167em"></mspace><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S4} = \dfrac{1}{M}\displaystyle\sum_j \left(\dfrac{\partial\hat\theta}{\partial \mathrm{pF}}\bigg\|_{t_j}\right)^{\!2}</annotation></semantics></math></td>
 <td>pF ∈ [−2.0, −0.3]</td>
 <td>λ₆ = 1</td>
 </tr>
 </tbody>
 </table>
-<p>Data loss uses separate weights for the wet end (λ₁ = 1, pF ≤ 4.2) and the dry end (λ₂ = 10, pF &gt; 4.2), following the original paper.</p>
+<p><strong>S1</strong> enforces that the curve becomes a straight line at the dry end — this is the key structural difference from Van Genuchten (shaded orange region in the figure above). <strong>S2/S3</strong> act as hard barriers that prevent the network from predicting negative or positive water content at the physical bounds. <strong>S4</strong> penalises any slope in the saturated plateau (shaded blue region).</p>
+<p>The default weights are accessed via <code>norouzi_lambdas("norouzi")</code>; a smoother dry end uses <code>norouzi_lambdas("smooth")</code> (λ₃ = 10).</p>
 <hr>
+</div>
 </div>
 <div class="section level2">
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
