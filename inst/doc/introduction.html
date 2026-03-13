@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Hugo Rodrigues" />
+
+<meta name="date" content="2026-03-13" />
+
+<title>Introduction to soilFlux</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to soilFlux</h1>
+<h3 class="subtitle">Physics-Informed CNN1D for Soil Water Retention
+Curves</h3>
+<h4 class="author">Hugo Rodrigues</h4>
+<h4 class="date">2026-03-13</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#overview" id="toc-overview"><span class="toc-section-number">1</span> Overview</a>
+<ul>
+<li><a href="#what-is-the-swrc" id="toc-what-is-the-swrc"><span class="toc-section-number">1.1</span> What is the SWRC?</a></li>
+<li><a href="#key-features" id="toc-key-features"><span class="toc-section-number">1.2</span> Key features</a></li>
+</ul></li>
+<li><a href="#quick-start" id="toc-quick-start"><span class="toc-section-number">2</span> Quick-start</a>
+<ul>
+<li><a href="#installation" id="toc-installation"><span class="toc-section-number">2.1</span> Installation</a></li>
+<li><a href="#minimal-example" id="toc-minimal-example"><span class="toc-section-number">2.2</span> Minimal example</a></li>
+</ul></li>
+<li><a href="#data-preparation" id="toc-data-preparation"><span class="toc-section-number">3</span> Data preparation</a>
+<ul>
+<li><a href="#expected-columns" id="toc-expected-columns"><span class="toc-section-number">3.1</span> Expected columns</a></li>
+<li><a href="#unit-handling" id="toc-unit-handling"><span class="toc-section-number">3.2</span> Unit handling</a></li>
+</ul></li>
+<li><a href="#model-architecture" id="toc-model-architecture"><span class="toc-section-number">4</span> Model architecture</a>
+<ul>
+<li><a href="#monotone-integral-layer" id="toc-monotone-integral-layer"><span class="toc-section-number">4.1</span> Monotone integral layer</a></li>
+<li><a href="#inputs-to-the-model" id="toc-inputs-to-the-model"><span class="toc-section-number">4.2</span> Inputs to the model</a></li>
+</ul></li>
+<li><a href="#physics-constraints" id="toc-physics-constraints"><span class="toc-section-number">5</span> Physics constraints</a></li>
+<li><a href="#saving-and-loading-models" id="toc-saving-and-loading-models"><span class="toc-section-number">6</span> Saving and loading models</a></li>
+<li><a href="#visualisation" id="toc-visualisation"><span class="toc-section-number">7</span> Visualisation</a>
+<ul>
+<li><a href="#swrc-curves" id="toc-swrc-curves"><span class="toc-section-number">7.1</span> SWRC curves</a></li>
+<li><a href="#predicted-vs.-observed" id="toc-predicted-vs.-observed"><span class="toc-section-number">7.2</span> Predicted vs. observed</a></li>
+<li><a href="#training-history" id="toc-training-history"><span class="toc-section-number">7.3</span> Training history</a></li>
+</ul></li>
+<li><a href="#texture-classification" id="toc-texture-classification"><span class="toc-section-number">8</span> Texture classification</a></li>
+<li><a href="#session-information" id="toc-session-information"><span class="toc-section-number">9</span> Session information</a></li>
+<li><a href="#references" id="toc-references"><span class="toc-section-number">10</span> References</a></li>
+</ul>
+</div>
+
+<div id="overview" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Overview</h1>
+<blockquote>
+<p><strong>Note:</strong> All code in this vignette requires TensorFlow
+and Keras to be installed. See <code>?soilFlux</code> for installation
+instructions. The outputs shown are representative examples from a
+training run on the <code>swrc_example</code> dataset.</p>
+</blockquote>
+<p>The <strong>soilFlux</strong> package implements a physics-informed
+one-dimensional convolutional neural network (CNN1D-PINN) for estimating
+the complete <em>soil water retention curve</em> (SWRC) as a continuous
+function of matric potential. The architecture and physics constraints
+are adapted from Norouzi et al. (2025).</p>
+<div id="what-is-the-swrc" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> What is the
+SWRC?</h2>
+<p>The soil water retention curve describes the relationship between
+volumetric water content (<span class="math inline">\(\theta\)</span>,
+m³/m³) and matric potential (expressed as pF = log₁₀(<em>h</em> [cm])).
+It is a key input to most hydrological and land-surface models.</p>
+</div>
+<div id="key-features" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> Key features</h2>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Monotone by construction</strong></td>
+<td>θ decreases with pF by architecture (cumulative integral of positive
+slopes)</td>
+</tr>
+<tr class="even">
+<td><strong>Physics-informed</strong></td>
+<td>Four residual constraints enforce known physical behaviour</td>
+</tr>
+<tr class="odd">
+<td><strong>Continuous output</strong></td>
+<td>Predicts θ at <em>any</em> pF value, not just standard pressure
+heads</td>
+</tr>
+<tr class="even">
+<td><strong>Multi-covariate</strong></td>
+<td>Uses texture (sand/silt/clay fractions), bulk density, SOC, and
+depth</td>
+</tr>
+<tr class="odd">
+<td><strong>Ready to save/load</strong></td>
+<td>Weights persisted via Keras HDF5 for spatial prediction</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+<div id="quick-start" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Quick-start</h1>
+<div id="installation" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Installation</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Install development version from GitHub</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;hugo-rodrigues/soilFlux&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Required Python backend (once per machine)</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>tensorflow<span class="sc">::</span><span class="fu">install_tensorflow</span>()</span></code></pre></div>
+</div>
+<div id="minimal-example" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> Minimal example</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(soilFlux)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># 1. Load and prepare data --------------------------------------------------</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;swrc_example&quot;</span>)   <span class="co"># example dataset bundled with the package</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">prepare_swrc_data</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  swrc_example,</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>  <span class="at">depth_col =</span> <span class="st">&quot;depth&quot;</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="at">fix_bd    =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>  <span class="at">fix_theta =</span> <span class="cn">TRUE</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>)</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># Train / validation / test split (by PEDON_ID)</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>ids      <span class="ot">&lt;-</span> <span class="fu">unique</span>(df<span class="sc">$</span>PEDON_ID)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>tr_ids   <span class="ot">&lt;-</span> <span class="fu">sample</span>(ids, <span class="fu">floor</span>(<span class="fl">0.7</span> <span class="sc">*</span> <span class="fu">length</span>(ids)))</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>val_ids  <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">setdiff</span>(ids, tr_ids), <span class="fu">floor</span>(<span class="fl">0.15</span> <span class="sc">*</span> <span class="fu">length</span>(ids)))</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>te_ids   <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(ids, <span class="fu">c</span>(tr_ids, val_ids))</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>train_df <span class="ot">&lt;-</span> df[df<span class="sc">$</span>PEDON_ID <span class="sc">%in%</span> tr_ids,  ]</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>val_df   <span class="ot">&lt;-</span> df[df<span class="sc">$</span>PEDON_ID <span class="sc">%in%</span> val_ids, ]</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>test_df  <span class="ot">&lt;-</span> df[df<span class="sc">$</span>PEDON_ID <span class="sc">%in%</span> te_ids,  ]</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co"># 2. Fit model --------------------------------------------------------------</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">fit_swrc</span>(</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>  <span class="at">train_df   =</span> train_df,</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>  <span class="at">x_inputs   =</span> <span class="fu">c</span>(<span class="st">&quot;clay&quot;</span>, <span class="st">&quot;silt&quot;</span>, <span class="st">&quot;bd_gcm3&quot;</span>, <span class="st">&quot;soc&quot;</span>, <span class="st">&quot;Depth_num&quot;</span>),</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>  <span class="at">val_df     =</span> val_df,</span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>  <span class="at">epochs     =</span> <span class="dv">60</span>,</span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a>  <span class="at">batch_size =</span> <span class="dv">256</span>,</span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a>  <span class="at">lambdas    =</span> <span class="fu">norouzi_lambdas</span>(<span class="st">&quot;norouzi&quot;</span>),</span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a>  <span class="at">verbose    =</span> <span class="cn">TRUE</span></span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a>)</span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a><span class="co"># 3. Evaluate ---------------------------------------------------------------</span></span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">evaluate_swrc</span>(fit, test_df)</span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="fu">print</span>(m)</span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a><span class="co"># 4. Dense SWRC curves ------------------------------------------------------</span></span>
+<span id="cb2-40"><a href="#cb2-40" tabindex="-1"></a>dense <span class="ot">&lt;-</span> <span class="fu">predict_swrc_dense</span>(fit, <span class="at">newdata =</span> test_df, <span class="at">n_points =</span> <span class="dv">500</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" tabindex="-1"></a><span class="co"># 5. Plot -------------------------------------------------------------------</span></span>
+<span id="cb2-43"><a href="#cb2-43" tabindex="-1"></a><span class="fu">plot_swrc</span>(dense, <span class="at">obs_points =</span> test_df,</span>
+<span id="cb2-44"><a href="#cb2-44" tabindex="-1"></a>          <span class="at">obs_col   =</span> <span class="st">&quot;theta_n&quot;</span>,</span>
+<span id="cb2-45"><a href="#cb2-45" tabindex="-1"></a>          <span class="at">facet_row =</span> <span class="st">&quot;Depth_label&quot;</span>,</span>
+<span id="cb2-46"><a href="#cb2-46" tabindex="-1"></a>          <span class="at">facet_col =</span> <span class="st">&quot;Texture&quot;</span>)</span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="data-preparation" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Data preparation</h1>
+<div id="expected-columns" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Expected columns</h2>
+<p><code>prepare_swrc_data()</code> expects (at minimum):</p>
+<table>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Description</th>
+<th>Units</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>PEDON_ID</code></td>
+<td>Unique profile identifier</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td><code>depth</code></td>
+<td>Depth interval (e.g. <code>&quot;0-5&quot;</code>)</td>
+<td>cm</td>
+</tr>
+<tr class="odd">
+<td><code>matric_head</code></td>
+<td>Matric head</td>
+<td>cm</td>
+</tr>
+<tr class="even">
+<td><code>water_content</code></td>
+<td>Volumetric water content</td>
+<td>m³/m³ or %</td>
+</tr>
+<tr class="odd">
+<td>Covariates</td>
+<td>e.g. <code>clay</code>, <code>silt</code>, <code>bd</code>,
+<code>soc</code></td>
+<td>%, g/cm³</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="unit-handling" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Unit handling</h2>
+<p>The package automatically detects and corrects common unit
+issues:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Bulk density: if median &gt; 10, assumes kg/m3 and converts to g/cm3</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">fix_bd_units</span>(<span class="fu">c</span>(<span class="dv">1200</span>, <span class="dv">1450</span>, <span class="dv">1300</span>))   <span class="co"># kg/m3 -&gt; g/cm3</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># Theta: if max &gt; 1.5, assumes % and divides by 100</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">theta_unit_factor</span>(<span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">40</span>, <span class="dv">25</span>))    <span class="co"># returns 100</span></span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="model-architecture" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Model architecture</h1>
+<div id="monotone-integral-layer" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Monotone integral
+layer</h2>
+<p>The model output is:</p>
+<p><span class="math display">\[\hat{\theta}(\text{pF}) = \theta_s -
+\int_0^{\text{pF}} \text{softplus}(s(t)) \, dt\]</span></p>
+<p>where <span class="math inline">\(s(t)\)</span> is a 1-channel Conv1D
+output. Because softplus &gt; 0 always, the integral is strictly
+increasing, so <span class="math inline">\(\hat{\theta}\)</span> is
+<strong>strictly decreasing</strong> — monotonicity is guaranteed <em>by
+construction</em>, not by post-processing.</p>
+</div>
+<div id="inputs-to-the-model" class="section level2" number="4.2">
+<h2><span class="header-section-number">4.2</span> Inputs to the
+model</h2>
+<p>Each observation is encoded as a 3-D sequence: * Shape:
+<code>[N, K, p+1]</code> * <code>K</code> = number of knot points
+(default 64) * <code>p</code> = number of covariates * Last channel =
+knot position in [0, 1]</p>
+<p>This design broadcasts each covariate across all knot positions,
+allowing the Conv1D layers to learn shape-from-texture mappings.</p>
+<hr />
+</div>
+</div>
+<div id="physics-constraints" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Physics
+constraints</h1>
+<p>Four residual constraints from Norouzi et al. (2025) are embedded in
+the loss function:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Set</th>
+<th>Constraint</th>
+<th>pF range</th>
+<th>Default weight</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>S1</td>
+<td>Linearity at dry end: ∣∂²θ/∂pF²∣ → 0</td>
+<td>[5.0, 7.6]</td>
+<td>λ₃ = 1</td>
+</tr>
+<tr class="even">
+<td>S2</td>
+<td>Non-negativity: θ(pF = 6.2) ≥ 0</td>
+<td>fixed</td>
+<td>λ₄ = 1000</td>
+</tr>
+<tr class="odd">
+<td>S3</td>
+<td>Non-positivity: θ(pF = 7.6) ≤ 0</td>
+<td>fixed</td>
+<td>λ₅ = 1000</td>
+</tr>
+<tr class="even">
+<td>S4</td>
+<td>Flat plateau: ∣∂θ/∂pF∣ → 0</td>
+<td>[−2.0, −0.3]</td>
+<td>λ₆ = 1</td>
+</tr>
+</tbody>
+</table>
+<p>Plus two data-loss weights:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>λ₁</td>
+<td>Wet-end data loss (pF ≤ 4.2)</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>λ₂</td>
+<td>Dry-end data loss (pF &gt; 4.2)</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Exact replication of Norouzi et al. (2025) Table 1</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">norouzi_lambdas</span>(<span class="st">&quot;norouzi&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># Smoother dry-end (lambda3 = 10)</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">norouzi_lambdas</span>(<span class="st">&quot;smooth&quot;</span>)</span></code></pre></div>
+<hr />
+</div>
+<div id="saving-and-loading-models" class="section level1" number="6">
+<h1><span class="header-section-number">6</span> Saving and loading
+models</h1>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Save</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">save_swrc_model</span>(fit, <span class="at">dir =</span> <span class="st">&quot;./models&quot;</span>, <span class="at">name =</span> <span class="st">&quot;model_5&quot;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># Check it exists</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">swrc_model_exists</span>(<span class="st">&quot;./models&quot;</span>, <span class="st">&quot;model_5&quot;</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># Reload (in a new session, after library(soilFlux))</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">load_swrc_model</span>(<span class="st">&quot;./models&quot;</span>, <span class="st">&quot;model_5&quot;</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>pred <span class="ot">&lt;-</span> <span class="fu">predict_swrc</span>(fit2, <span class="at">newdata =</span> test_df)</span></code></pre></div>
+<hr />
+</div>
+<div id="visualisation" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> Visualisation</h1>
+<div id="swrc-curves" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> SWRC curves</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>dense <span class="ot">&lt;-</span> <span class="fu">predict_swrc_dense</span>(fit, <span class="at">newdata =</span> test_df, <span class="at">n_points =</span> <span class="dv">500</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">plot_swrc</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">pred_curves  =</span> dense,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">obs_points   =</span> test_df,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">obs_col      =</span> <span class="st">&quot;theta_n&quot;</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">facet_row    =</span> <span class="st">&quot;Depth_label&quot;</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  <span class="at">facet_col    =</span> <span class="st">&quot;Texture&quot;</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="at">line_colour  =</span> <span class="st">&quot;steelblue4&quot;</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="at">point_colour =</span> <span class="st">&quot;black&quot;</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="predicted-vs.-observed" class="section level2" number="7.2">
+<h2><span class="header-section-number">7.2</span> Predicted
+vs. observed</h2>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>pred_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">theta_n         =</span> test_df<span class="sc">$</span>theta_n,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">theta_predicted =</span> <span class="fu">predict_swrc</span>(fit, test_df),</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">Texture         =</span> test_df<span class="sc">$</span>Texture</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="fu">plot_pred_obs</span>(pred_df, <span class="at">group_col =</span> <span class="st">&quot;Texture&quot;</span>)</span></code></pre></div>
+</div>
+<div id="training-history" class="section level2" number="7.3">
+<h2><span class="header-section-number">7.3</span> Training history</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">plot_training_history</span>(fit)</span></code></pre></div>
+<hr />
+</div>
+</div>
+<div id="texture-classification" class="section level1" number="8">
+<h1><span class="header-section-number">8</span> Texture
+classification</h1>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">classify_texture</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="at">sand =</span> <span class="fu">c</span>(<span class="dv">70</span>, <span class="dv">20</span>, <span class="dv">10</span>),</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>  <span class="at">silt =</span> <span class="fu">c</span>(<span class="dv">15</span>, <span class="dv">50</span>, <span class="dv">30</span>),</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="at">clay =</span> <span class="fu">c</span>(<span class="dv">15</span>, <span class="dv">30</span>, <span class="dv">60</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co"># Add as a column to a data frame</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="fu">add_texture</span>(df, <span class="at">sand_col =</span> <span class="st">&quot;sand_total&quot;</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co"># Texture triangle (requires ggtern)</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="fu">texture_triangle</span>(df, <span class="at">color_col =</span> <span class="st">&quot;Texture&quot;</span>)</span></code></pre></div>
+<hr />
+</div>
+<div id="session-information" class="section level1" number="9">
+<h1><span class="header-section-number">9</span> Session
+information</h1>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+</div>
+<div id="references" class="section level1" number="10">
+<h1><span class="header-section-number">10</span> References</h1>
+<p>Norouzi, A. M., Feyereisen, G. W., Papanicolaou, A. N., &amp; Wilson,
+C. G. (2025). Physics-Informed Neural Networks for Estimating a
+Continuous Form of the Soil Water Retention Curve. <em>Journal of
+Hydrology</em>.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

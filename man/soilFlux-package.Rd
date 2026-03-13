@@ -38,12 +38,13 @@ Estimating a Continuous Form of the Soil Water Retention Curve.
 Useful links:
 \itemize{
   \item \url{https://github.com/HugoMachadoRodrigues/soilFlux}
+  \item \url{https://hugomachadorodrigues.github.io/soilFlux/}
   \item Report bugs at \url{https://github.com/HugoMachadoRodrigues/soilFlux/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Hugo Rodrigues \email{rodrigues.h@ufl.edu}
+\strong{Maintainer}: Hugo Rodrigues \email{rodrigues.machado.hugo@gmail.com} (\href{https://orcid.org/0000-0002-8070-8126}{ORCID})
 
 }
 \keyword{internal}

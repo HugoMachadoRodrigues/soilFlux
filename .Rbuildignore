@@ -14,3 +14,6 @@
 ^\.claude$
 ^cran-comments\.md$
 ^CITATION\.cff$
+^CRAN-SUBMISSION$
+^doc$
+^Meta$

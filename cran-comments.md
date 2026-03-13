@@ -27,6 +27,8 @@ CRAN packages `tensorflow` and `keras3`.
   `@examples` sections.
 * The vignette uses `eval = FALSE` for all code chunks and shows
   representative pre-computed outputs. It does not require TensorFlow to build.
+* A pre-built HTML version of the vignette is included in `inst/doc/` so
+  that `R CMD check --no-build-vignettes` finds it on all platforms.
 * Package installation succeeds without Python/TensorFlow installed;
   a clear error message is issued when TF functions are called without a
   valid Python environment.
