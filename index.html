@@ -75,7 +75,7 @@
 <p><strong>Physics-informed CNN1D for estimating the complete soil water retention curve (SWRC) as a continuous, monotone function of matric potential.</strong></p>
 </blockquote>
 <p align="center">
-<img src="reference/figures/swrc_curves.png" width="720" alt="CNN1D-PINN predictions for Sandy, Loam and Clay soils"></p>
+<img src="reference/figures/swrc_curves.png" width="720" alt="Van Genuchten vs CNN1D-PINN curves for Sandy, Loam and Clay soils"></p>
 <hr>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
@@ -180,51 +180,15 @@
 <h3 id="physics-residuals">Physics residuals<a class="anchor" aria-label="anchor" href="#physics-residuals"></a>
 </h3>
 <p>Collocation points {<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mi>j</mi></msub><annotation encoding="application/x-tex">t_j</annotation></semantics></math>} are sampled from each constraint domain at each training step. Gradients are computed via automatic differentiation (TensorFlow <code>GradientTape</code>).</p>
-<table style="width:100%;" class="table">
-<colgroup>
-<col width="16%">
-<col width="46%">
-<col width="26%">
-<col width="10%">
-</colgroup>
-<thead><tr class="header">
-<th>Set</th>
-<th>Residual loss</th>
-<th>Domain</th>
-<th>λ</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>
-<strong>S1</strong> — linear dry end</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>1</mn></mrow></msub><mo>=</mo><mfrac displaystyle="true"><mn>1</mn><mi>M</mi></mfrac><msub><mo>∑</mo><mi>j</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac displaystyle="true"><mrow><msup><mi>∂</mi><mn>2</mn></msup><mover><mi>θ</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><msup><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow><mn>2</mn></msup></mrow></mfrac><msub><mo minsize="2.4" maxsize="2.4" stretchy="false" form="postfix">∥</mo><msub><mi>t</mi><mi>j</mi></msub></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mspace width="-0.167em"></mspace><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S1} = \dfrac{1}{M}\displaystyle\sum_j \left(\dfrac{\partial^2\hat\theta}{\partial \mathrm{pF}^2}\bigg\|_{t_j}\right)^{\!2}</annotation></semantics></math></td>
-<td>pF ∈ [5.0, 7.6]</td>
-<td>λ₃ = 1</td>
-</tr>
-<tr class="even">
-<td>
-<strong>S2</strong> — non-negativity</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>2</mn></mrow></msub><mo>=</mo><mo>max</mo><mspace width="-0.167em"></mspace><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.167em"></mspace><mo>−</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mn>6.2</mn><mo stretchy="true" form="postfix">)</mo></mrow><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S2} = \max\!\bigl(0,\,-\hat\theta(6.2)\bigr)^2</annotation></semantics></math></td>
-<td>pF = 6.2</td>
-<td>λ₄ = 1 000</td>
-</tr>
-<tr class="odd">
-<td>
-<strong>S3</strong> — non-positivity</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>3</mn></mrow></msub><mo>=</mo><mo>max</mo><mspace width="-0.167em"></mspace><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.167em"></mspace><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mn>7.6</mn><mo stretchy="true" form="postfix">)</mo></mrow><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S3} = \max\!\bigl(0,\,\hat\theta(7.6)\bigr)^2</annotation></semantics></math></td>
-<td>pF = 7.6</td>
-<td>λ₅ = 1 000</td>
-</tr>
-<tr class="even">
-<td>
-<strong>S4</strong> — wet plateau</td>
-<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>4</mn></mrow></msub><mo>=</mo><mfrac displaystyle="true"><mn>1</mn><mi>M</mi></mfrac><msub><mo>∑</mo><mi>j</mi></msub><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac displaystyle="true"><mrow><mi>∂</mi><mover><mi>θ</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow></mrow></mfrac><msub><mo minsize="2.4" maxsize="2.4" stretchy="false" form="postfix">∥</mo><msub><mi>t</mi><mi>j</mi></msub></msub><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mspace width="-0.167em"></mspace><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S4} = \dfrac{1}{M}\displaystyle\sum_j \left(\dfrac{\partial\hat\theta}{\partial \mathrm{pF}}\bigg\|_{t_j}\right)^{\!2}</annotation></semantics></math></td>
-<td>pF ∈ [−2.0, −0.3]</td>
-<td>λ₆ = 1</td>
-</tr>
-</tbody>
-</table>
-<p><strong>S1</strong> enforces that the curve becomes a straight line at the dry end — this is the key structural difference from Van Genuchten (shaded orange region in the figure above). <strong>S2/S3</strong> act as hard barriers that prevent the network from predicting negative or positive water content at the physical bounds. <strong>S4</strong> penalises any slope in the saturated plateau (shaded blue region).</p>
+<p><strong>S1 — Linear dry end</strong>   (domain: pF ∈ [5.0, 7.6], λ₃ = 1)</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>1</mn></mrow></msub><mo>=</mo><mfrac><mn>1</mn><mi>M</mi></mfrac><munder><mo>∑</mo><mi>j</mi></munder><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mover><mi>θ</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><msup><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow><mn>2</mn></msup></mrow></mfrac><msub><mo minsize="2.4" maxsize="2.4" stretchy="false" form="prefix">|</mo><msub><mi>t</mi><mi>j</mi></msub></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S1} = \frac{1}{M}\sum_{j} \left(\frac{\partial^2\hat\theta}{\partial \mathrm{pF}^2}\bigg|_{t_j}\right)^{2}</annotation></semantics></math></p>
+<p><strong>S2 — Non-negativity</strong>   (domain: pF = 6.2, λ₄ = 1 000)</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>2</mn></mrow></msub><mo>=</mo><mo>max</mo><mspace width="-0.167em"></mspace><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.167em"></mspace><mo>−</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mn>6.2</mn><mo stretchy="true" form="postfix">)</mo></mrow><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S2} = \max\!\bigl(0,\,-\hat\theta(6.2)\bigr)^2</annotation></semantics></math></p>
+<p><strong>S3 — Non-positivity</strong>   (domain: pF = 7.6, λ₅ = 1 000)</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>3</mn></mrow></msub><mo>=</mo><mo>max</mo><mspace width="-0.167em"></mspace><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mspace width="0.167em"></mspace><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mn>7.6</mn><mo stretchy="true" form="postfix">)</mo></mrow><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S3} = \max\!\bigl(0,\,\hat\theta(7.6)\bigr)^2</annotation></semantics></math></p>
+<p><strong>S4 — Saturated plateau</strong>   (domain: pF ∈ [−2.0, −0.3], λ₆ = 1)</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>4</mn></mrow></msub><mo>=</mo><mfrac><mn>1</mn><mi>M</mi></mfrac><munder><mo>∑</mo><mi>j</mi></munder><msup><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mi>∂</mi><mover><mi>θ</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><mrow><mi mathvariant="normal">p</mi><mi mathvariant="normal">F</mi></mrow></mrow></mfrac><msub><mo minsize="2.4" maxsize="2.4" stretchy="false" form="prefix">|</mo><msub><mi>t</mi><mi>j</mi></msub></msub><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathcal{L}_{S4} = \frac{1}{M}\sum_{j} \left(\frac{\partial\hat\theta}{\partial \mathrm{pF}}\bigg|_{t_j}\right)^{2}</annotation></semantics></math></p>
+<p><strong>S1</strong> enforces that the curve becomes a straight line at the dry end (orange region) — the most visible structural difference from Van Genuchten, which continues to curve smoothly all the way to the dry end (compare solid vs. dashed lines in the figure above). <strong>S2/S3</strong> act as hard barriers that prevent the network from predicting negative or positive water content at the physical bounds. <strong>S4</strong> penalises any slope in the saturated plateau (blue region).</p>
 <p>The default weights are accessed via <code>norouzi_lambdas("norouzi")</code>; a smoother dry end uses <code>norouzi_lambdas("smooth")</code> (λ₃ = 10).</p>
 <hr>
 </div>
