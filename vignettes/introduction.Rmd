@@ -14,7 +14,6 @@ vignette: >
   %\VignetteIndexEntry{Introduction to soilFlux}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
-bibliography: references.bib
 ---
 
 ```{r setup, eval=FALSE, include = FALSE}

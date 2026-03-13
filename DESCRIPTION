@@ -53,5 +53,5 @@ Suggests:
     withr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: https://github.com/HugoMachadoRodrigues/soilFlux
+URL: https://github.com/HugoMachadoRodrigues/soilFlux, https://hugomachadorodrigues.github.io/soilFlux/
 BugReports: https://github.com/HugoMachadoRodrigues/soilFlux/issues
