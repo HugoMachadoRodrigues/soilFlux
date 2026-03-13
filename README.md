@@ -237,7 +237,7 @@ If you use soilFlux, please cite:
 **Package:**
 
 > Rodrigues, H. (2026). *soilFlux: Physics-Informed Neural Networks for Soil
-> Water Retention Curves*. R package version 0.1.0.
+> Water Retention Curves*. R package version 0.1.1.
 > <https://doi.org/10.5281/zenodo.18990856>
 
 **Original architecture:**

@@ -1,4 +1,4 @@
-# CRAN submission comments — soilFlux 0.1.0
+# CRAN submission comments — soilFlux 0.1.1
 
 ## Test environments
 
