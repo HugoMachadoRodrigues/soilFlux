@@ -34,9 +34,12 @@ Useful links:
 
 - <https://github.com/HugoMachadoRodrigues/soilFlux>
 
+- <https://hugomachadorodrigues.github.io/soilFlux/>
+
 - Report bugs at
   <https://github.com/HugoMachadoRodrigues/soilFlux/issues>
 
 ## Author
 
-**Maintainer**: Hugo Rodrigues <rodrigues.h@ufl.edu>
+**Maintainer**: Hugo Rodrigues <rodrigues.machado.hugo@gmail.com>
+([ORCID](https://orcid.org/0000-0002-8070-8126))
