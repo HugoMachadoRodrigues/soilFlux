@@ -1,0 +1,311 @@
+# soilFlux
+
+## Overview
+
+**soilFlux** implements a physics-informed 1-D convolutional neural
+network (CNN1D-PINN) for estimating the complete **soil water retention
+curve** (SWRC) as a continuous function of matric potential. The
+architecture and physics constraints are adapted from **Norouzi et
+al. (2025)** and implemented in R via TensorFlow/Keras.
+
+The model estimates volumetric water content (θ, m³/m³) at *any* pF
+value from soil texture fractions, organic carbon, bulk density, and
+depth — without discrete look-up tables.
+
+### Why soilFlux?
+
+| Classical PTFs                                   | soilFlux                                           |
+|--------------------------------------------------|----------------------------------------------------|
+| Predict θ at fixed pressure heads (e.g. FC, PWP) | Predict θ at **any** pF value                      |
+| No physics constraints                           | Four physics constraints embedded in the loss      |
+| May violate monotonicity                         | **Monotone by construction** (cumulative integral) |
+| Point estimates                                  | Full continuous SWRC curves                        |
+
+------------------------------------------------------------------------
+
+## Installation
+
+``` r
+# Install from GitHub (development version)
+remotes::install_github("HugoMachadoRodrigues/soilFlux")
+
+# Install TensorFlow backend (once per machine)
+tensorflow::install_tensorflow()
+```
+
+**Dependencies:** R ≥ 4.1, TensorFlow ≥ 2.14, keras3, reticulate.
+
+------------------------------------------------------------------------
+
+## Quick example
+
+``` r
+library(soilFlux)
+
+# 1. Prepare data
+data("swrc_example")
+df <- prepare_swrc_data(swrc_example, depth_col = "depth")
+
+# Split into train / validation / test
+ids     <- unique(df$PEDON_ID)
+set.seed(42)
+tr_ids  <- sample(ids, floor(0.70 * length(ids)))
+val_ids <- sample(setdiff(ids, tr_ids), floor(0.15 * length(ids)))
+te_ids  <- setdiff(ids, c(tr_ids, val_ids))
+
+train_df <- df[df$PEDON_ID %in% tr_ids,  ]
+val_df   <- df[df$PEDON_ID %in% val_ids, ]
+test_df  <- df[df$PEDON_ID %in% te_ids,  ]
+
+# 2. Fit model
+fit <- fit_swrc(
+  train_df  = train_df,
+  x_inputs  = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+  val_df    = val_df,
+  epochs    = 80,
+  lambdas   = norouzi_lambdas("norouzi"),
+  verbose   = TRUE
+)
+
+# 3. Evaluate
+evaluate_swrc(fit, test_df)
+
+# 4. Dense curve prediction
+dense <- predict_swrc_dense(fit, newdata = test_df, n_points = 500)
+
+# 5. Plot
+plot_swrc(dense, obs_points = test_df,
+          obs_col   = "theta_n",
+          facet_row = "Depth_label",
+          facet_col = "Texture")
+```
+
+------------------------------------------------------------------------
+
+## Architecture
+
+The model takes two inputs:
+
+1.  **`Xseq_knots`** (shape `[N, K, p+1]`) — covariates broadcast across
+    `K` knot positions.
+2.  **`pf_norm`** (shape `[N, 1]`) — query pF value normalised to
+    `[0, 1]`.
+
+Output:
+
+$$\widehat{\theta}\left( \text{pF} \right) = \theta_{s} - \int_{0}^{\text{pF}}\text{softplus}\left( s(t) \right)\, dt$$
+
+where $s(t)$ is a Conv1D output. Because `softplus > 0`, the integral is
+strictly increasing, so $\widehat{\theta}$ is **strictly decreasing** —
+monotonicity is guaranteed *by architecture*, not by post-processing.
+
+------------------------------------------------------------------------
+
+## Physics constraints (Norouzi et al. 2025, Table 1)
+
+| Set | Physics condition                    | Domain              | Weight    |
+|-----|--------------------------------------|---------------------|-----------|
+| S1  | Linearity at dry end: ∣∂²θ/∂pF²∣ → 0 | pF ∈ \[5.0, 7.6\]   | λ₃ = 1    |
+| S2  | Non-negativity: θ(pF = 6.2) ≥ 0      | fixed               | λ₄ = 1000 |
+| S3  | Non-positivity: θ(pF = 7.6) ≤ 0      | fixed               | λ₅ = 1000 |
+| S4  | Flat saturated plateau: ∣∂θ/∂pF∣ → 0 | pF ∈ \[−2.0, −0.3\] | λ₆ = 1    |
+
+Data loss weights: λ₁ = 1 (wet end, pF ≤ 4.2), λ₂ = 10 (dry end).
+
+------------------------------------------------------------------------
+
+## Main functions
+
+| Function                                                                                                        | Purpose                                |
+|-----------------------------------------------------------------------------------------------------------------|----------------------------------------|
+| [`prepare_swrc_data()`](https://hugomachadorodrigues.github.io/soilFlux/reference/prepare_swrc_data.md)         | Standardise raw soil data              |
+| [`fit_swrc()`](https://hugomachadorodrigues.github.io/soilFlux/reference/fit_swrc.md)                           | Train the CNN1D-PINN model             |
+| [`predict_swrc()`](https://hugomachadorodrigues.github.io/soilFlux/reference/predict_swrc.md)                   | Predict θ at specific pF / head values |
+| [`predict_swrc_dense()`](https://hugomachadorodrigues.github.io/soilFlux/reference/predict_swrc_dense.md)       | Predict full SWRC curves               |
+| [`predict_theta_s()`](https://hugomachadorodrigues.github.io/soilFlux/reference/predict_theta_s.md)             | Extract modelled θs                    |
+| [`evaluate_swrc()`](https://hugomachadorodrigues.github.io/soilFlux/reference/evaluate_swrc.md)                 | R², RMSE, MAE on test set              |
+| [`swrc_metrics()`](https://hugomachadorodrigues.github.io/soilFlux/reference/swrc_metrics.md)                   | Regression metrics                     |
+| [`norouzi_lambdas()`](https://hugomachadorodrigues.github.io/soilFlux/reference/norouzi_lambdas.md)             | Default loss-weight configurations     |
+| [`build_residual_sets()`](https://hugomachadorodrigues.github.io/soilFlux/reference/build_residual_sets.md)     | Physics collocation points             |
+| [`save_swrc_model()`](https://hugomachadorodrigues.github.io/soilFlux/reference/save_swrc_model.md)             | Save weights + metadata                |
+| [`load_swrc_model()`](https://hugomachadorodrigues.github.io/soilFlux/reference/load_swrc_model.md)             | Reload saved model                     |
+| [`plot_swrc()`](https://hugomachadorodrigues.github.io/soilFlux/reference/plot_swrc.md)                         | SWRC curve figure                      |
+| [`plot_pred_obs()`](https://hugomachadorodrigues.github.io/soilFlux/reference/plot_pred_obs.md)                 | Predicted vs. observed plot            |
+| [`plot_swrc_metrics()`](https://hugomachadorodrigues.github.io/soilFlux/reference/plot_swrc_metrics.md)         | Model comparison bar chart             |
+| [`plot_training_history()`](https://hugomachadorodrigues.github.io/soilFlux/reference/plot_training_history.md) | Training loss curves                   |
+| [`classify_texture()`](https://hugomachadorodrigues.github.io/soilFlux/reference/classify_texture.md)           | USDA texture classification            |
+| [`texture_triangle()`](https://hugomachadorodrigues.github.io/soilFlux/reference/texture_triangle.md)           | Ternary texture diagram                |
+
+------------------------------------------------------------------------
+
+## Reference
+
+Norouzi, A. M., Feyereisen, G. W., Papanicolaou, A. N., & Wilson, C. G.
+(2025). Physics-Informed Neural Networks for Estimating a Continuous
+Form of the Soil Water Retention Curve. *Journal of Hydrology*.
+
+------------------------------------------------------------------------
+
+## License
+
+MIT © 2025 Hugo Rodrigues
+
+# Package index
+
+## Data preparation
+
+Standardise raw soil data for modelling
+
+- [`prepare_swrc_data()`](https://hugomachadorodrigues.github.io/soilFlux/reference/prepare_swrc_data.md)
+  : Prepare a soil data frame for SWRC modelling
+
+## Model fitting
+
+Train the CNN1D-PINN and swrc_fit S3 methods
+
+- [`fit_swrc()`](https://hugomachadorodrigues.github.io/soilFlux/reference/fit_swrc.md)
+  : Fit a physics-informed CNN1D SWRC model
+- [`build_swrc_model()`](https://hugomachadorodrigues.github.io/soilFlux/reference/build_swrc_model.md)
+  : Build the CNN1D monotone-integral SWRC model
+- [`norouzi_lambdas()`](https://hugomachadorodrigues.github.io/soilFlux/reference/norouzi_lambdas.md)
+  : Return default Norouzi et al. (2025) loss weights (lambdas)
+- [`build_residual_sets()`](https://hugomachadorodrigues.github.io/soilFlux/reference/build_residual_sets.md)
+  : Build physics residual point sets (S1 – S4)
+- [`print(`*`<swrc_fit>`*`)`](https://hugomachadorodrigues.github.io/soilFlux/reference/print.swrc_fit.md)
+  : Print method for swrc_fit
+- [`summary(`*`<swrc_fit>`*`)`](https://hugomachadorodrigues.github.io/soilFlux/reference/summary.swrc_fit.md)
+  : Summary method for swrc_fit
+
+## Prediction
+
+Predict water content at specific or dense pF grids
+
+- [`predict_swrc()`](https://hugomachadorodrigues.github.io/soilFlux/reference/predict_swrc.md)
+  : Predict water content at specific pF or matric-head values
+- [`predict_swrc_dense()`](https://hugomachadorodrigues.github.io/soilFlux/reference/predict_swrc_dense.md)
+  : Predict dense SWRC curves for a set of soil profiles
+- [`predict_theta_s()`](https://hugomachadorodrigues.github.io/soilFlux/reference/predict_theta_s.md)
+  : Extract saturated water content (theta_s) from covariates
+- [`predict(`*`<swrc_fit>`*`)`](https://hugomachadorodrigues.github.io/soilFlux/reference/predict.swrc_fit.md)
+  : Predict method for swrc_fit
+
+## Evaluation & metrics
+
+Performance metrics and evaluation
+
+- [`evaluate_swrc()`](https://hugomachadorodrigues.github.io/soilFlux/reference/evaluate_swrc.md)
+  : Compute metrics from a swrc_fit on new data
+- [`swrc_metrics()`](https://hugomachadorodrigues.github.io/soilFlux/reference/swrc_metrics.md)
+  : Compute regression metrics for SWRC predictions
+- [`swrc_metrics_by_group()`](https://hugomachadorodrigues.github.io/soilFlux/reference/swrc_metrics_by_group.md)
+  : Compute regression metrics by group
+
+## Visualisation
+
+Publication-quality plots
+
+- [`plot_swrc()`](https://hugomachadorodrigues.github.io/soilFlux/reference/plot_swrc.md)
+  : Plot soil water retention curves (SWRC)
+- [`plot_pred_obs()`](https://hugomachadorodrigues.github.io/soilFlux/reference/plot_pred_obs.md)
+  : Plot predicted vs. observed water content
+- [`plot_swrc_metrics()`](https://hugomachadorodrigues.github.io/soilFlux/reference/plot_swrc_metrics.md)
+  : Plot model performance metric comparison
+- [`plot_training_history()`](https://hugomachadorodrigues.github.io/soilFlux/reference/plot_training_history.md)
+  : Plot training loss history
+
+## Texture
+
+USDA texture classification and triangle
+
+- [`classify_texture()`](https://hugomachadorodrigues.github.io/soilFlux/reference/classify_texture.md)
+  : Classify soil texture according to the USDA system
+- [`add_texture()`](https://hugomachadorodrigues.github.io/soilFlux/reference/add_texture.md)
+  : Add texture classification column to a data frame
+- [`texture_triangle()`](https://hugomachadorodrigues.github.io/soilFlux/reference/texture_triangle.md)
+  : Plot a soil texture triangle (ternary diagram)
+
+## Save / Load
+
+Persist and reload trained models
+
+- [`save_swrc_model()`](https://hugomachadorodrigues.github.io/soilFlux/reference/save_swrc_model.md)
+  : Save a fitted SWRC model to disk
+- [`load_swrc_model()`](https://hugomachadorodrigues.github.io/soilFlux/reference/load_swrc_model.md)
+  : Load a previously saved SWRC model from disk
+- [`swrc_model_exists()`](https://hugomachadorodrigues.github.io/soilFlux/reference/swrc_model_exists.md)
+  : Check whether a model directory contains a valid saved model
+
+## Internal helpers
+
+Scaling, physics, utilities
+
+- [`fit_minmax()`](https://hugomachadorodrigues.github.io/soilFlux/reference/fit_minmax.md)
+  : Fit a min-max scaler from a training data frame
+- [`apply_minmax()`](https://hugomachadorodrigues.github.io/soilFlux/reference/apply_minmax.md)
+  : Apply a fitted min-max scaler to a data frame
+- [`invert_minmax()`](https://hugomachadorodrigues.github.io/soilFlux/reference/invert_minmax.md)
+  : Invert a min-max scaling transformation
+- [`pf_from_head()`](https://hugomachadorodrigues.github.io/soilFlux/reference/pf_from_head.md)
+  : Convert matric head (cm) to pF
+- [`head_from_pf()`](https://hugomachadorodrigues.github.io/soilFlux/reference/head_from_pf.md)
+  : Convert pF to matric head (cm)
+- [`pf_normalize()`](https://hugomachadorodrigues.github.io/soilFlux/reference/pf_normalize.md)
+  : Normalise pF values to \[0, 1\]
+- [`head_normalize()`](https://hugomachadorodrigues.github.io/soilFlux/reference/head_normalize.md)
+  : Normalise matric head (cm) to the pF domain
+- [`parse_depth()`](https://hugomachadorodrigues.github.io/soilFlux/reference/parse_depth.md)
+  : Parse a soil depth string into midpoint and label
+- [`parse_depth_column()`](https://hugomachadorodrigues.github.io/soilFlux/reference/parse_depth_column.md)
+  : Parse depth column in a data frame
+- [`fix_bd_units()`](https://hugomachadorodrigues.github.io/soilFlux/reference/fix_bd_units.md)
+  : Detect and correct bulk-density units
+- [`theta_unit_factor()`](https://hugomachadorodrigues.github.io/soilFlux/reference/theta_unit_factor.md)
+  : Detect theta unit scale factor
+- [`compute_physics_loss()`](https://hugomachadorodrigues.github.io/soilFlux/reference/compute_physics_loss.md)
+  : Compute the physics-informed residual loss (Norouzi et al. 2025)
+- [`residual_to_tensors()`](https://hugomachadorodrigues.github.io/soilFlux/reference/residual_to_tensors.md)
+  : Convert residual point sets to TensorFlow tensors
+- [`make_obs_matrices()`](https://hugomachadorodrigues.github.io/soilFlux/reference/make_obs_matrices.md)
+  : Build observation matrices for the CNN1D model
+- [`make_profile_array()`](https://hugomachadorodrigues.github.io/soilFlux/reference/make_profile_array.md)
+  : Build a sequence array for one or more soil profiles
+- [`make_train_step()`](https://hugomachadorodrigues.github.io/soilFlux/reference/make_train_step.md)
+  : Create an eager-mode train step function
+- [`safe_grad()`](https://hugomachadorodrigues.github.io/soilFlux/reference/safe_grad.md)
+  : Safely compute a TensorFlow gradient
+- [`data_prep`](https://hugomachadorodrigues.github.io/soilFlux/reference/data_prep.md)
+  : Data preparation for CNN1D SWRC modelling
+- [`io`](https://hugomachadorodrigues.github.io/soilFlux/reference/io.md)
+  : Save and load fitted SWRC models
+- [`metrics`](https://hugomachadorodrigues.github.io/soilFlux/reference/metrics.md)
+  : Performance metrics for SWRC models
+- [`model`](https://hugomachadorodrigues.github.io/soilFlux/reference/model.md)
+  : CNN1D monotone-integral model architecture
+- [`physics`](https://hugomachadorodrigues.github.io/soilFlux/reference/physics.md)
+  : Physics-informed constraints for SWRC modelling
+- [`plots`](https://hugomachadorodrigues.github.io/soilFlux/reference/plots.md)
+  : Publication-quality plots for SWRC analysis
+- [`predict`](https://hugomachadorodrigues.github.io/soilFlux/reference/predict.md)
+  : Prediction from fitted SWRC models
+- [`scale`](https://hugomachadorodrigues.github.io/soilFlux/reference/scale.md)
+  : Min-max feature scaling
+- [`texture`](https://hugomachadorodrigues.github.io/soilFlux/reference/texture.md)
+  : USDA soil texture classification
+- [`train`](https://hugomachadorodrigues.github.io/soilFlux/reference/train.md)
+  : Training the CNN1D SWRC model
+- [`utils`](https://hugomachadorodrigues.github.io/soilFlux/reference/utils.md)
+  : Utility functions for soilFlux
+
+## Data
+
+Example datasets
+
+- [`swrc_example`](https://hugomachadorodrigues.github.io/soilFlux/reference/swrc_example.md)
+  : Example soil water retention dataset
+
+# Articles
+
+### All vignettes
+
+- [Introduction to
+  soilFlux](https://hugomachadorodrigues.github.io/soilFlux/articles/introduction.md):

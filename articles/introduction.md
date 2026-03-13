@@ -1,0 +1,264 @@
+# Introduction to soilFlux
+
+## Overview
+
+> **Note:** All code in this vignette requires TensorFlow and Keras to
+> be installed. See
+> [`?soilFlux`](https://hugomachadorodrigues.github.io/soilFlux/reference/soilFlux-package.md)
+> for installation instructions. The outputs shown are representative
+> examples from a training run on the `swrc_example` dataset.
+
+The **soilFlux** package implements a physics-informed one-dimensional
+convolutional neural network (CNN1D-PINN) for estimating the complete
+*soil water retention curve* (SWRC) as a continuous function of matric
+potential. The architecture and physics constraints are adapted from
+Norouzi et al. (2025).
+
+### What is the SWRC?
+
+The soil water retention curve describes the relationship between
+volumetric water content ($\theta$, m³/m³) and matric potential
+(expressed as pF = log₁₀(*h* \[cm\])). It is a key input to most
+hydrological and land-surface models.
+
+### Key features
+
+| Feature                      | Description                                                                  |
+|------------------------------|------------------------------------------------------------------------------|
+| **Monotone by construction** | θ decreases with pF by architecture (cumulative integral of positive slopes) |
+| **Physics-informed**         | Four residual constraints enforce known physical behaviour                   |
+| **Continuous output**        | Predicts θ at *any* pF value, not just standard pressure heads               |
+| **Multi-covariate**          | Uses texture (sand/silt/clay fractions), bulk density, SOC, and depth        |
+| **Ready to save/load**       | Weights persisted via Keras HDF5 for spatial prediction                      |
+
+------------------------------------------------------------------------
+
+## Quick-start
+
+### Installation
+
+``` r
+# Install development version from GitHub
+remotes::install_github("hugo-rodrigues/soilFlux")
+
+# Required Python backend (once per machine)
+tensorflow::install_tensorflow()
+```
+
+### Minimal example
+
+``` r
+library(soilFlux)
+
+# 1. Load and prepare data --------------------------------------------------
+data("swrc_example")   # example dataset bundled with the package
+
+df <- prepare_swrc_data(
+  swrc_example,
+  depth_col = "depth",
+  fix_bd    = TRUE,
+  fix_theta = TRUE
+)
+
+# Train / validation / test split (by PEDON_ID)
+ids      <- unique(df$PEDON_ID)
+set.seed(42)
+tr_ids   <- sample(ids, floor(0.7 * length(ids)))
+val_ids  <- sample(setdiff(ids, tr_ids), floor(0.15 * length(ids)))
+te_ids   <- setdiff(ids, c(tr_ids, val_ids))
+
+train_df <- df[df$PEDON_ID %in% tr_ids,  ]
+val_df   <- df[df$PEDON_ID %in% val_ids, ]
+test_df  <- df[df$PEDON_ID %in% te_ids,  ]
+
+# 2. Fit model --------------------------------------------------------------
+fit <- fit_swrc(
+  train_df   = train_df,
+  x_inputs   = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+  val_df     = val_df,
+  epochs     = 60,
+  batch_size = 256,
+  lambdas    = norouzi_lambdas("norouzi"),
+  verbose    = TRUE
+)
+
+# 3. Evaluate ---------------------------------------------------------------
+m <- evaluate_swrc(fit, test_df)
+print(m)
+
+# 4. Dense SWRC curves ------------------------------------------------------
+dense <- predict_swrc_dense(fit, newdata = test_df, n_points = 500)
+
+# 5. Plot -------------------------------------------------------------------
+plot_swrc(dense, obs_points = test_df,
+          obs_col   = "theta_n",
+          facet_row = "Depth_label",
+          facet_col = "Texture")
+```
+
+------------------------------------------------------------------------
+
+## Data preparation
+
+### Expected columns
+
+[`prepare_swrc_data()`](https://hugomachadorodrigues.github.io/soilFlux/reference/prepare_swrc_data.md)
+expects (at minimum):
+
+| Column          | Description                      | Units      |
+|-----------------|----------------------------------|------------|
+| `PEDON_ID`      | Unique profile identifier        | —          |
+| `depth`         | Depth interval (e.g. `"0-5"`)    | cm         |
+| `matric_head`   | Matric head                      | cm         |
+| `water_content` | Volumetric water content         | m³/m³ or % |
+| Covariates      | e.g. `clay`, `silt`, `bd`, `soc` | %, g/cm³   |
+
+### Unit handling
+
+The package automatically detects and corrects common unit issues:
+
+``` r
+# Bulk density: if median > 10, assumes kg/m3 and converts to g/cm3
+fix_bd_units(c(1200, 1450, 1300))   # kg/m3 -> g/cm3
+
+# Theta: if max > 1.5, assumes % and divides by 100
+theta_unit_factor(c(30, 40, 25))    # returns 100
+```
+
+------------------------------------------------------------------------
+
+## Model architecture
+
+### Monotone integral layer
+
+The model output is:
+
+$$\widehat{\theta}\left( \text{pF} \right) = \theta_{s} - \int_{0}^{\text{pF}}\text{softplus}\left( s(t) \right)\, dt$$
+
+where $s(t)$ is a 1-channel Conv1D output. Because softplus \> 0 always,
+the integral is strictly increasing, so $\widehat{\theta}$ is **strictly
+decreasing** — monotonicity is guaranteed *by construction*, not by
+post-processing.
+
+### Inputs to the model
+
+Each observation is encoded as a 3-D sequence: \* Shape: `[N, K, p+1]`
+\* `K` = number of knot points (default 64) \* `p` = number of
+covariates \* Last channel = knot position in \[0, 1\]
+
+This design broadcasts each covariate across all knot positions,
+allowing the Conv1D layers to learn shape-from-texture mappings.
+
+------------------------------------------------------------------------
+
+## Physics constraints
+
+Four residual constraints from Norouzi et al. (2025) are embedded in the
+loss function:
+
+| Set | Constraint                           | pF range       | Default weight |
+|-----|--------------------------------------|----------------|----------------|
+| S1  | Linearity at dry end: ∣∂²θ/∂pF²∣ → 0 | \[5.0, 7.6\]   | λ₃ = 1         |
+| S2  | Non-negativity: θ(pF = 6.2) ≥ 0      | fixed          | λ₄ = 1000      |
+| S3  | Non-positivity: θ(pF = 7.6) ≤ 0      | fixed          | λ₅ = 1000      |
+| S4  | Flat plateau: ∣∂θ/∂pF∣ → 0           | \[−2.0, −0.3\] | λ₆ = 1         |
+
+Plus two data-loss weights:
+
+| Term | Description                   | Default |
+|------|-------------------------------|---------|
+| λ₁   | Wet-end data loss (pF ≤ 4.2)  | 1       |
+| λ₂   | Dry-end data loss (pF \> 4.2) | 10      |
+
+``` r
+# Exact replication of Norouzi et al. (2025) Table 1
+norouzi_lambdas("norouzi")
+
+# Smoother dry-end (lambda3 = 10)
+norouzi_lambdas("smooth")
+```
+
+------------------------------------------------------------------------
+
+## Saving and loading models
+
+``` r
+# Save
+save_swrc_model(fit, dir = "./models", name = "model_5")
+
+# Check it exists
+swrc_model_exists("./models", "model_5")
+
+# Reload (in a new session, after library(soilFlux))
+fit2 <- load_swrc_model("./models", "model_5")
+pred <- predict_swrc(fit2, newdata = test_df)
+```
+
+------------------------------------------------------------------------
+
+## Visualisation
+
+### SWRC curves
+
+``` r
+dense <- predict_swrc_dense(fit, newdata = test_df, n_points = 500)
+
+plot_swrc(
+  pred_curves  = dense,
+  obs_points   = test_df,
+  obs_col      = "theta_n",
+  facet_row    = "Depth_label",
+  facet_col    = "Texture",
+  line_colour  = "steelblue4",
+  point_colour = "black"
+)
+```
+
+### Predicted vs. observed
+
+``` r
+pred_df <- data.frame(
+  theta_n         = test_df$theta_n,
+  theta_predicted = predict_swrc(fit, test_df),
+  Texture         = test_df$Texture
+)
+plot_pred_obs(pred_df, group_col = "Texture")
+```
+
+### Training history
+
+``` r
+plot_training_history(fit)
+```
+
+------------------------------------------------------------------------
+
+## Texture classification
+
+``` r
+classify_texture(
+  sand = c(70, 20, 10),
+  silt = c(15, 50, 30),
+  clay = c(15, 30, 60)
+)
+
+# Add as a column to a data frame
+add_texture(df, sand_col = "sand_total")
+
+# Texture triangle (requires ggtern)
+texture_triangle(df, color_col = "Texture")
+```
+
+------------------------------------------------------------------------
+
+## Session information
+
+``` r
+sessionInfo()
+```
+
+## References
+
+Norouzi, A. M., Feyereisen, G. W., Papanicolaou, A. N., & Wilson, C. G.
+(2025). Physics-Informed Neural Networks for Estimating a Continuous
+Form of the Soil Water Retention Curve. *Journal of Hydrology*.
