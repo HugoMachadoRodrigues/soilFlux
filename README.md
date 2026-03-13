@@ -13,7 +13,7 @@
 
 <p align="center">
   <img src="man/figures/swrc_curves.png" width="720"
-       alt="CNN1D-PINN predictions for Sandy, Loam and Clay soils" />
+       alt="Van Genuchten vs CNN1D-PINN curves for Sandy, Loam and Clay soils" />
 </p>
 
 ---
@@ -128,18 +128,28 @@ Collocation points {$t_j$} are sampled from each constraint domain at each
 training step. Gradients are computed via automatic differentiation
 (TensorFlow `GradientTape`).
 
-| Set | Residual loss | Domain | λ |
-|-----|--------------|--------|---|
-| **S1** — linear dry end | $\mathcal{L}_{S1} = \dfrac{1}{M}\displaystyle\sum_j \left(\dfrac{\partial^2\hat\theta}{\partial \mathrm{pF}^2}\bigg\|_{t_j}\right)^{\!2}$ | pF ∈ \[5.0, 7.6\] | λ₃ = 1 |
-| **S2** — non-negativity | $\mathcal{L}_{S2} = \max\!\bigl(0,\,-\hat\theta(6.2)\bigr)^2$ | pF = 6.2 | λ₄ = 1 000 |
-| **S3** — non-positivity | $\mathcal{L}_{S3} = \max\!\bigl(0,\,\hat\theta(7.6)\bigr)^2$ | pF = 7.6 | λ₅ = 1 000 |
-| **S4** — wet plateau | $\mathcal{L}_{S4} = \dfrac{1}{M}\displaystyle\sum_j \left(\dfrac{\partial\hat\theta}{\partial \mathrm{pF}}\bigg\|_{t_j}\right)^{\!2}$ | pF ∈ \[−2.0, −0.3\] | λ₆ = 1 |
+**S1 — Linear dry end** &nbsp; (domain: pF ∈ [5.0, 7.6], λ₃ = 1)
 
-**S1** enforces that the curve becomes a straight line at the dry end — this
-is the key structural difference from Van Genuchten (shaded orange region in
-the figure above). **S2/S3** act as hard barriers that prevent the network
-from predicting negative or positive water content at the physical bounds.
-**S4** penalises any slope in the saturated plateau (shaded blue region).
+$$\mathcal{L}_{S1} = \frac{1}{M}\sum_{j} \left(\frac{\partial^2\hat\theta}{\partial \mathrm{pF}^2}\bigg|_{t_j}\right)^{2}$$
+
+**S2 — Non-negativity** &nbsp; (domain: pF = 6.2, λ₄ = 1 000)
+
+$$\mathcal{L}_{S2} = \max\!\bigl(0,\,-\hat\theta(6.2)\bigr)^2$$
+
+**S3 — Non-positivity** &nbsp; (domain: pF = 7.6, λ₅ = 1 000)
+
+$$\mathcal{L}_{S3} = \max\!\bigl(0,\,\hat\theta(7.6)\bigr)^2$$
+
+**S4 — Saturated plateau** &nbsp; (domain: pF ∈ [−2.0, −0.3], λ₆ = 1)
+
+$$\mathcal{L}_{S4} = \frac{1}{M}\sum_{j} \left(\frac{\partial\hat\theta}{\partial \mathrm{pF}}\bigg|_{t_j}\right)^{2}$$
+
+**S1** enforces that the curve becomes a straight line at the dry end (orange
+region) — the most visible structural difference from Van Genuchten, which
+continues to curve smoothly all the way to the dry end (compare solid vs.
+dashed lines in the figure above). **S2/S3** act as hard barriers that prevent
+the network from predicting negative or positive water content at the physical
+bounds. **S4** penalises any slope in the saturated plateau (blue region).
 
 The default weights are accessed via `norouzi_lambdas("norouzi")`; a smoother
 dry end uses `norouzi_lambdas("smooth")` (λ₃ = 10).
