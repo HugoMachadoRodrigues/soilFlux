@@ -95,13 +95,15 @@
 <p>where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">s(t)</annotation></semantics></math> is a Conv1D output and softplus &gt; 0 everywhere, so the integral is strictly increasing and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>θ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{\theta}</annotation></semantics></math> is <strong>strictly decreasing</strong> — <em>monotonicity is a structural property, not a post-processing step.</em></p>
 <table class="table">
 <colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
 </colgroup>
 <thead><tr class="header">
 <th></th>
 <th>Van Genuchten</th>
+<th>Norouzi et al. (MLP-PINN)</th>
 <th>soilFlux (CNN1D-PINN)</th>
 </tr></thead>
 <tbody>
@@ -109,30 +111,42 @@
 <td><strong>Inputs</strong></td>
 <td>Measured θ at ≥ 4 pressure heads</td>
 <td>Texture, OC, BD, depth</td>
+<td>Texture, OC, BD, depth</td>
 </tr>
 <tr class="even">
 <td><strong>Outputs</strong></td>
 <td>θ at <em>any</em> h (after fitting)</td>
 <td>θ at <em>any</em> pF (direct inference)</td>
+<td>θ at <em>any</em> pF (direct inference)</td>
 </tr>
 <tr class="odd">
+<td><strong>Backbone</strong></td>
+<td>—</td>
+<td>MLP</td>
+<td><strong>Conv1D</strong></td>
+</tr>
+<tr class="even">
 <td><strong>Monotonicity</strong></td>
 <td>Not guaranteed</td>
 <td>✅ By architecture</td>
-</tr>
-<tr class="even">
-<td><strong>Physics constraints</strong></td>
-<td>None</td>
-<td>✅ 4 residual constraints in loss</td>
+<td>✅ By architecture</td>
 </tr>
 <tr class="odd">
+<td><strong>Physics constraints</strong></td>
+<td>None</td>
+<td>✅ 4 residual constraints</td>
+<td>✅ 4 residual constraints (adapted)</td>
+</tr>
+<tr class="even">
 <td><strong>New samples</strong></td>
 <td>Re-fit required</td>
 <td>Single forward pass</td>
+<td>Single forward pass</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>Uncertainty</strong></td>
 <td>Delta method / bootstrap</td>
+<td>—</td>
 <td>Prediction interval via ensemble</td>
 </tr>
 </tbody>
@@ -142,6 +156,7 @@
 <div class="section level2">
 <h2 id="architecture">Architecture<a class="anchor" aria-label="anchor" href="#architecture"></a>
 </h2>
+<p>Norouzi et al. (2025) proposed their physics-informed approach using a <strong>multi-layer perceptron (MLP)</strong> as the backbone. <strong>soilFlux replaces the MLP with a one-dimensional convolutional network (Conv1D)</strong>, treating the pF axis as an ordered sequence and letting the convolutional filters learn local curvature patterns along the retention curve.</p>
 <table class="table"><tr>
 <td width="55%">
 <p>The model takes a 3-D input tensor of shape <code>[N, K, p+1]</code>, where <em>K</em> = 64 knot positions uniformly spaced across the pF domain and <em>p</em> = number of soil covariates. A stack of Conv1D layers produces slope values at each knot; these are passed through <code>softplus</code> and integrated via the trapezoidal rule to produce the monotone SWRC output:</p>
@@ -165,8 +180,9 @@
 <hr>
 </div>
 <div class="section level2">
-<h2 id="loss-function-norouzi-et-al-2025">Loss function (Norouzi et al. 2025)<a class="anchor" aria-label="anchor" href="#loss-function-norouzi-et-al-2025"></a>
+<h2 id="loss-function-adapted-from-norouzi-et-al-2025">Loss function (adapted from Norouzi et al. 2025)<a class="anchor" aria-label="anchor" href="#loss-function-adapted-from-norouzi-et-al-2025"></a>
 </h2>
+<p>The loss function design — the wet/dry data split and all four physics residual constraints (S1–S4) — is adapted directly from Norouzi et al. (2025). The CNN1D backbone described above replaces their original MLP.</p>
 <p>The total training loss combines a <strong>data term</strong> and four <strong>physics residual terms</strong>, each weighted by a tunable λ:</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℒ</mi><mo>=</mo><munder><munder><mrow><msub><mi>λ</mi><mn>1</mn></msub><msub><mi>ℒ</mi><mtext mathvariant="normal">wet</mtext></msub><mo>+</mo><msub><mi>λ</mi><mn>2</mn></msub><msub><mi>ℒ</mi><mtext mathvariant="normal">dry</mtext></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">data loss</mtext></munder><mo>+</mo><munder><munder><mrow><msub><mi>λ</mi><mn>3</mn></msub><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>λ</mi><mn>4</mn></msub><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>2</mn></mrow></msub><mo>+</mo><msub><mi>λ</mi><mn>5</mn></msub><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>3</mn></mrow></msub><mo>+</mo><msub><mi>λ</mi><mn>6</mn></msub><msub><mi>ℒ</mi><mrow><mi>S</mi><mn>4</mn></mrow></msub></mrow><mo accent="true">⏟</mo></munder><mtext mathvariant="normal">physics loss</mtext></munder></mrow><annotation encoding="application/x-tex">\mathcal{L} = \underbrace{\lambda_1 \mathcal{L}_{\text{wet}} + \lambda_2 \mathcal{L}_{\text{dry}}}_{\text{data loss}} + \underbrace{\lambda_3 \mathcal{L}_{S1} + \lambda_4 \mathcal{L}_{S2} + \lambda_5 \mathcal{L}_{S3} + \lambda_6 \mathcal{L}_{S4}}_{\text{physics loss}}</annotation></semantics></math></p>
 <div class="section level3">

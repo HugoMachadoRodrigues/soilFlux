@@ -46,24 +46,37 @@ integral is strictly increasing and $\widehat{\theta}$ is **strictly
 decreasing** — *monotonicity is a structural property, not a
 post-processing step.*
 
-|                         | Van Genuchten                    | soilFlux (CNN1D-PINN)             |
-|-------------------------|----------------------------------|-----------------------------------|
-| **Inputs**              | Measured θ at ≥ 4 pressure heads | Texture, OC, BD, depth            |
-| **Outputs**             | θ at *any* h (after fitting)     | θ at *any* pF (direct inference)  |
-| **Monotonicity**        | Not guaranteed                   | ✅ By architecture                |
-| **Physics constraints** | None                             | ✅ 4 residual constraints in loss |
-| **New samples**         | Re-fit required                  | Single forward pass               |
-| **Uncertainty**         | Delta method / bootstrap         | Prediction interval via ensemble  |
+|                         | Van Genuchten                    | Norouzi et al. (MLP-PINN)        | soilFlux (CNN1D-PINN)               |
+|-------------------------|----------------------------------|----------------------------------|-------------------------------------|
+| **Inputs**              | Measured θ at ≥ 4 pressure heads | Texture, OC, BD, depth           | Texture, OC, BD, depth              |
+| **Outputs**             | θ at *any* h (after fitting)     | θ at *any* pF (direct inference) | θ at *any* pF (direct inference)    |
+| **Backbone**            | —                                | MLP                              | **Conv1D**                          |
+| **Monotonicity**        | Not guaranteed                   | ✅ By architecture               | ✅ By architecture                  |
+| **Physics constraints** | None                             | ✅ 4 residual constraints        | ✅ 4 residual constraints (adapted) |
+| **New samples**         | Re-fit required                  | Single forward pass              | Single forward pass                 |
+| **Uncertainty**         | Delta method / bootstrap         | —                                | Prediction interval via ensemble    |
 
 ------------------------------------------------------------------------
 
 ## Architecture
 
+Norouzi et al. (2025) proposed their physics-informed approach using a
+**multi-layer perceptron (MLP)** as the backbone. **soilFlux replaces
+the MLP with a one-dimensional convolutional network (Conv1D)**,
+treating the pF axis as an ordered sequence and letting the
+convolutional filters learn local curvature patterns along the retention
+curve.
+
 [TABLE]
 
 ------------------------------------------------------------------------
 
-## Loss function (Norouzi et al. 2025)
+## Loss function (adapted from Norouzi et al. 2025)
+
+The loss function design — the wet/dry data split and all four physics
+residual constraints (S1–S4) — is adapted directly from Norouzi et
+al. (2025). The CNN1D backbone described above replaces their original
+MLP.
 
 The total training loss combines a **data term** and four **physics
 residual terms**, each weighted by a tunable λ:
