@@ -105,20 +105,44 @@ Soil covariates (p)
 
 ---
 
-## Physics constraints (Norouzi et al. 2025, Table 1)
+## Loss function (Norouzi et al. 2025)
 
-Four physics-based residual sets are sampled at collocation points and added
-to the data loss with tunable weights:
+The total training loss combines a **data term** and four **physics residual
+terms**, each weighted by a tunable λ:
 
-| Set | Condition | Domain | Loss weight |
-|-----|-----------|--------|-------------|
-| **S1** | Linearity at dry end: $\|\partial^2\theta/\partial\mathrm{pF}^2\| \to 0$ | pF ∈ \[5.0, 7.6\] | λ₃ = 1 |
-| **S2** | Non-negativity: θ(pF = 6.2) ≥ 0 | fixed | λ₄ = 1 000 |
-| **S3** | Non-positivity: θ(pF = 7.6) ≤ 0 | fixed | λ₅ = 1 000 |
-| **S4** | Flat saturated plateau: $\|\partial\theta/\partial\mathrm{pF}\| \to 0$ | pF ∈ \[−2.0, −0.3\] | λ₆ = 1 |
+$$\mathcal{L} = \underbrace{\lambda_1 \mathcal{L}_{\text{wet}} + \lambda_2 \mathcal{L}_{\text{dry}}}_{\text{data loss}} + \underbrace{\lambda_3 \mathcal{L}_{S1} + \lambda_4 \mathcal{L}_{S2} + \lambda_5 \mathcal{L}_{S3} + \lambda_6 \mathcal{L}_{S4}}_{\text{physics loss}}$$
 
-Data loss uses separate weights for the wet end (λ₁ = 1, pF ≤ 4.2) and the
-dry end (λ₂ = 10, pF > 4.2), following the original paper.
+### Data loss
+
+The observed data are split at pF = 4.2 (wilting point) and weighted
+separately to balance the large dynamic range of the curve:
+
+$$\mathcal{L}_{\text{wet}} = \frac{1}{N_w}\sum_{i \in \text{wet}} \bigl(\hat\theta_i - \theta_i\bigr)^2, \qquad \mathcal{L}_{\text{dry}} = \frac{1}{N_d}\sum_{i \in \text{dry}} \bigl(\hat\theta_i - \theta_i\bigr)^2$$
+
+with λ₁ = 1, λ₂ = 10 — the dry end is up-weighted because observed values
+are close to zero and small absolute errors carry proportionally more weight.
+
+### Physics residuals
+
+Collocation points {$t_j$} are sampled from each constraint domain at each
+training step. Gradients are computed via automatic differentiation
+(TensorFlow `GradientTape`).
+
+| Set | Residual loss | Domain | λ |
+|-----|--------------|--------|---|
+| **S1** — linear dry end | $\mathcal{L}_{S1} = \dfrac{1}{M}\displaystyle\sum_j \left(\dfrac{\partial^2\hat\theta}{\partial \mathrm{pF}^2}\bigg\|_{t_j}\right)^{\!2}$ | pF ∈ \[5.0, 7.6\] | λ₃ = 1 |
+| **S2** — non-negativity | $\mathcal{L}_{S2} = \max\!\bigl(0,\,-\hat\theta(6.2)\bigr)^2$ | pF = 6.2 | λ₄ = 1 000 |
+| **S3** — non-positivity | $\mathcal{L}_{S3} = \max\!\bigl(0,\,\hat\theta(7.6)\bigr)^2$ | pF = 7.6 | λ₅ = 1 000 |
+| **S4** — wet plateau | $\mathcal{L}_{S4} = \dfrac{1}{M}\displaystyle\sum_j \left(\dfrac{\partial\hat\theta}{\partial \mathrm{pF}}\bigg\|_{t_j}\right)^{\!2}$ | pF ∈ \[−2.0, −0.3\] | λ₆ = 1 |
+
+**S1** enforces that the curve becomes a straight line at the dry end — this
+is the key structural difference from Van Genuchten (shaded orange region in
+the figure above). **S2/S3** act as hard barriers that prevent the network
+from predicting negative or positive water content at the physical bounds.
+**S4** penalises any slope in the saturated plateau (shaded blue region).
+
+The default weights are accessed via `norouzi_lambdas("norouzi")`; a smoother
+dry end uses `norouzi_lambdas("smooth")` (λ₃ = 10).
 
 ---
 
