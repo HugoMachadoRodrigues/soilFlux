@@ -1,4 +1,4 @@
-url: https://HugoMachadoRodrigues.github.io/soilFlux
+url: https://hugomachadorodrigues.github.io/soilFlux/
 
 template:
   bootstrap: 5
@@ -37,8 +37,9 @@ reference:
     desc: "Standardise raw soil data for modelling"
     contents: [prepare_swrc_data]
   - title: "Model fitting"
-    desc: "Train the CNN1D-PINN"
-    contents: [fit_swrc, build_swrc_model, norouzi_lambdas, build_residual_sets]
+    desc: "Train the CNN1D-PINN and swrc_fit S3 methods"
+    contents: [fit_swrc, build_swrc_model, norouzi_lambdas, build_residual_sets,
+               print.swrc_fit, summary.swrc_fit]
   - title: "Prediction"
     desc: "Predict water content at specific or dense pF grids"
     contents: [predict_swrc, predict_swrc_dense, predict_theta_s, predict.swrc_fit]
@@ -60,7 +61,9 @@ reference:
                pf_from_head, head_from_pf, pf_normalize, head_normalize,
                parse_depth, parse_depth_column, fix_bd_units, theta_unit_factor,
                compute_physics_loss, residual_to_tensors,
-               make_obs_matrices, make_profile_array, make_train_step, safe_grad]
+               make_obs_matrices, make_profile_array, make_train_step, safe_grad,
+               data_prep, io, metrics, model, physics, plots, predict,
+               scale, texture, train, utils]
   - title: "Data"
     desc: "Example datasets"
     contents: [swrc_example]
