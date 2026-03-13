@@ -13,14 +13,14 @@ Source:
 Rodrigues H (2026). *soilFlux: Physics-Informed Neural Networks for Soil
 Water Retention Curves*.
 [doi:10.5281/zenodo.18990856](https://doi.org/10.5281/zenodo.18990856),
-R package version 0.1.0,
+R package version 0.1.1,
 <https://github.com/HugoMachadoRodrigues/soilFlux>.
 
     @Manual{,
       title = {soilFlux: Physics-Informed Neural Networks for Soil Water Retention Curves},
       author = {Hugo Rodrigues},
       year = {2026},
-      note = {R package version 0.1.0},
+      note = {R package version 0.1.1},
       url = {https://github.com/HugoMachadoRodrigues/soilFlux},
       doi = {10.5281/zenodo.18990856},
     }
