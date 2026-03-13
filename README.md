@@ -1,4 +1,4 @@
-# soilFlux <img src="man/figures/logo.png" align="right" height="139" alt="" />
+# soilFlux <img src="man/figures/logo.png" align="right" height="170" alt="" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/R-CMD-check.yaml)
@@ -154,3 +154,4 @@ of the Soil Water Retention Curve. *Journal of Hydrology*.
 ## License
 
 MIT © 2025 Hugo Rodrigues
+
