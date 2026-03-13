@@ -1,6 +1,7 @@
 # soilFlux <img src="man/figures/logo.png" align="right" height="170" alt="soilFlux logo" />
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/soilFlux)](https://CRAN.R-project.org/package=soilFlux)
 [![R-CMD-check](https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/HugoMachadoRodrigues/soilFlux/actions/workflows/pkgdown.yaml/badge.svg)](https://hugomachadorodrigues.github.io/soilFlux/)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
