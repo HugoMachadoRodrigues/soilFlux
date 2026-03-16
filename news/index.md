@@ -1,8 +1,36 @@
 # Changelog
 
-## soilFlux (development version)
+## soilFlux 0.1.3
+
+### Bug fixes
+
+- Added prebuilt vignette index (`inst/doc/index.html`) to fix CRAN NOTE
+  “VignetteBuilder field but no prebuilt vignette index”.
+- Quoted technical acronyms (`'CNN1D-PINN'`, `'SWRC'`, `'pF'`) in
+  DESCRIPTION to reduce spell-check NOTEs on CRAN incoming checks.
+
+## soilFlux 0.1.2
+
+### Bug fixes
+
+- Fixed LaTeX PDF build error caused by Unicode character `≈` (U+2248)
+  in `.Rd` documentation. Replaced with `\eqn{\approx}` in
+  `make_obs_matrices` and `swrc_example` man pages.
+- Added `inst/WORDLIST` with domain-specific terms (`SWRC`, `PINN`,
+  `pF`, `Norouzi`, `matric`, `convolutional`, `positivity`) to suppress
+  spell-check NOTEs on CRAN incoming checks.
+
+## soilFlux 0.1.1
+
+### Bug fixes
+
+- Pre-built vignette output added to `inst/doc/` to avoid LaTeX/Pandoc
+  WARNINGs during CRAN checks.
+- Updated `.Rbuildignore` accordingly.
 
 ## soilFlux 0.1.0
+
+- Initial CRAN submission.
 
 ### New features
 

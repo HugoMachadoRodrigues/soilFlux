@@ -59,7 +59,7 @@ make_obs_matrices(
 - wet_split_cm:
 
   Matric head threshold (cm) separating wet / dry end (default `4.2`,
-  corresponding to pF ≈ 0.62).
+  corresponding to pF approximately 0.62).
 
 - w_wet:
 
