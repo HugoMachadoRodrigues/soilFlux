@@ -1,3 +1,12 @@
+# soilFlux 0.1.3
+
+## Bug fixes
+
+* Added prebuilt vignette index (`inst/doc/index.html`) to fix CRAN NOTE
+  "VignetteBuilder field but no prebuilt vignette index".
+* Quoted technical acronyms (`'CNN1D-PINN'`, `'SWRC'`, `'pF'`) in DESCRIPTION
+  to reduce spell-check NOTEs on CRAN incoming checks.
+
 # soilFlux 0.1.2
 
 ## Bug fixes
