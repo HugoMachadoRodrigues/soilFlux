@@ -85,8 +85,9 @@ $$\mathcal{L} = \underset{\text{data loss}}{\underbrace{\lambda_{1}\mathcal{L}_{
 
 ### Data loss
 
-The observed data are split at pF = 4.2 (wilting point) and weighted
-separately to balance the large dynamic range of the curve:
+The observed data are split at matric head = 4.2 cm (pF ≈ 0.62, near
+saturation) and weighted separately to balance the large dynamic range
+of the curve:
 
 $$\mathcal{L}_{\text{wet}} = \frac{1}{N_{w}}\sum\limits_{i \in \text{wet}}({\widehat{\theta}}_{i} - \theta_{i})^{2},\qquad\mathcal{L}_{\text{dry}} = \frac{1}{N_{d}}\sum\limits_{i \in \text{dry}}({\widehat{\theta}}_{i} - \theta_{i})^{2}$$
 
@@ -102,19 +103,19 @@ each training step. Gradients are computed via automatic differentiation
 
 **S1 — Linear dry end**   (domain: pF ∈ \[5.0, 7.6\], λ₃ = 1)
 
-$$\mathcal{L}_{S1} = \frac{1}{M}\sum\limits_{j}\left( \frac{\partial^{2}\widehat{\theta}}{\partial{pF}^{2}}|_{t_{j}} \right)^{2}$$
+$$\mathcal{L}_{S1} = \frac{1}{M}\sum\limits_{j}\left| \frac{\partial^{2}\widehat{\theta}}{\partial{pF}^{2}}|_{t_{j}} \right|$$
 
 **S2 — Non-negativity**   (domain: pF = 6.2, λ₄ = 1 000)
 
-$$\mathcal{L}_{S2} = \max\!(0,\, - \widehat{\theta}(6.2))^{2}$$
+$$\mathcal{L}_{S2} = \frac{1}{M}\sum\limits_{j}\max\!(0,\, - \widehat{\theta}(6.2))$$
 
 **S3 — Non-positivity**   (domain: pF = 7.6, λ₅ = 1 000)
 
-$$\mathcal{L}_{S3} = \max\!(0,\,\widehat{\theta}(7.6))^{2}$$
+$$\mathcal{L}_{S3} = \frac{1}{M}\sum\limits_{j}\max\!(0,\,\widehat{\theta}(7.6))$$
 
 **S4 — Saturated plateau**   (domain: pF ∈ \[−2.0, −0.3\], λ₆ = 1)
 
-$$\mathcal{L}_{S4} = \frac{1}{M}\sum\limits_{j}\left( \frac{\partial\widehat{\theta}}{\partial{pF}}|_{t_{j}} \right)^{2}$$
+$$\mathcal{L}_{S4} = \frac{1}{M}\sum\limits_{j}\left| \frac{\partial\widehat{\theta}}{\partial{pF}}|_{t_{j}} \right|$$
 
 **S1** enforces that the curve becomes a straight line at the dry end
 (orange region) — the most visible structural difference from Van
@@ -245,7 +246,7 @@ If you use soilFlux, please cite:
 **Package:**
 
 > Rodrigues, H. (2026). *soilFlux: Physics-Informed Neural Networks for
-> Soil Water Retention Curves*. R package version 0.1.1.
+> Soil Water Retention Curves*. R package version 0.1.4.
 > <https://doi.org/10.5281/zenodo.18990856>
 
 **Original architecture:**
