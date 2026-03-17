@@ -81,7 +81,7 @@ curvature patterns along the retention curve.
 The model takes a 3-D input tensor of shape `[N, K, p+1]`, where *K* = 64
 knot positions uniformly spaced across the pF domain and *p* = number of soil
 covariates. A stack of Conv1D layers produces slope values at each knot; these
-are passed through `softplus` and integrated via the trapezoidal rule to
+are passed through `softplus` and integrated via a left-Riemann sum to
 produce the monotone SWRC output:
 
 $$\hat{\theta}(\text{pF}) = \theta_s - \sum_{k=1}^{K} \text{softplus}(s_k)\,\Delta t_k$$
@@ -126,8 +126,9 @@ $$\mathcal{L} = \underbrace{\lambda_1 \mathcal{L}_{\text{wet}} + \lambda_2 \math
 
 ### Data loss
 
-The observed data are split at pF = 4.2 (wilting point) and weighted
-separately to balance the large dynamic range of the curve:
+The observed data are split at matric head = 4.2 cm (pF ≈ 0.62, near
+saturation) and weighted separately to balance the large dynamic range of
+the curve:
 
 $$\mathcal{L}_{\text{wet}} = \frac{1}{N_w}\sum_{i \in \text{wet}} \bigl(\hat\theta_i - \theta_i\bigr)^2, \qquad \mathcal{L}_{\text{dry}} = \frac{1}{N_d}\sum_{i \in \text{dry}} \bigl(\hat\theta_i - \theta_i\bigr)^2$$
 
@@ -142,19 +143,19 @@ training step. Gradients are computed via automatic differentiation
 
 **S1 — Linear dry end** &nbsp; (domain: pF ∈ [5.0, 7.6], λ₃ = 1)
 
-$$\mathcal{L}_{S1} = \frac{1}{M}\sum_{j} \left(\frac{\partial^2\hat\theta}{\partial \mathrm{pF}^2}\bigg|_{t_j}\right)^{2}$$
+$$\mathcal{L}_{S1} = \frac{1}{M}\sum_{j} \left|\frac{\partial^2\hat\theta}{\partial \mathrm{pF}^2}\bigg|_{t_j}\right|$$
 
 **S2 — Non-negativity** &nbsp; (domain: pF = 6.2, λ₄ = 1 000)
 
-$$\mathcal{L}_{S2} = \max\!\bigl(0,\,-\hat\theta(6.2)\bigr)^2$$
+$$\mathcal{L}_{S2} = \frac{1}{M}\sum_{j} \max\!\bigl(0,\,-\hat\theta(6.2)\bigr)$$
 
 **S3 — Non-positivity** &nbsp; (domain: pF = 7.6, λ₅ = 1 000)
 
-$$\mathcal{L}_{S3} = \max\!\bigl(0,\,\hat\theta(7.6)\bigr)^2$$
+$$\mathcal{L}_{S3} = \frac{1}{M}\sum_{j} \max\!\bigl(0,\,\hat\theta(7.6)\bigr)$$
 
 **S4 — Saturated plateau** &nbsp; (domain: pF ∈ [−2.0, −0.3], λ₆ = 1)
 
-$$\mathcal{L}_{S4} = \frac{1}{M}\sum_{j} \left(\frac{\partial\hat\theta}{\partial \mathrm{pF}}\bigg|_{t_j}\right)^{2}$$
+$$\mathcal{L}_{S4} = \frac{1}{M}\sum_{j} \left|\frac{\partial\hat\theta}{\partial \mathrm{pF}}\bigg|_{t_j}\right|$$
 
 **S1** enforces that the curve becomes a straight line at the dry end (orange
 region) — the most visible structural difference from Van Genuchten, which
@@ -283,7 +284,7 @@ If you use soilFlux, please cite:
 **Package:**
 
 > Rodrigues, H. (2026). *soilFlux: Physics-Informed Neural Networks for Soil
-> Water Retention Curves*. R package version 0.1.1.
+> Water Retention Curves*. R package version 0.1.4.
 > <https://doi.org/10.5281/zenodo.18990856>
 
 **Original architecture:**
