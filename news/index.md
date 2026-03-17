@@ -1,5 +1,12 @@
 # Changelog
 
+## soilFlux 0.1.4
+
+### Bug fixes
+
+- Updated `cran-comments.md` to reflect version 0.1.4 submission.
+- Minor whitespace normalization in project configuration files.
+
 ## soilFlux 0.1.3
 
 ### Bug fixes
