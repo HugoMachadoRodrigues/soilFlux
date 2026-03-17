@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/HugoMachadoRodrigues/soilFlux/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/HugoMachadoRodrigues/soilFlux/blob/v0.1.4/inst/CITATION)
 
 Rodrigues H (2026). *soilFlux: Physics-Informed Neural Networks for Soil
 Water Retention Curves*.
