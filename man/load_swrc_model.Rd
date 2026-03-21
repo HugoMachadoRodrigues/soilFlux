@@ -22,8 +22,14 @@ and returns a \code{swrc_fit}-compatible list that can be passed to
 }
 \examples{
 \donttest{
-fit <- load_swrc_model(tempdir(), "model_5")
-pred <- predict_swrc(fit, newdata = test_df)
+if (reticulate::py_module_available("tensorflow")) {
+  df  <- prepare_swrc_data(swrc_example, depth_col = "depth")
+  fit <- fit_swrc(df,
+                  x_inputs = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+                  epochs = 2L, verbose = FALSE)
+  save_swrc_model(fit, dir = tempdir(), name = "model_test")
+  fit2 <- load_swrc_model(tempdir(), "model_test")
+}
 }
 
 }

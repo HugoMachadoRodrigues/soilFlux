@@ -27,7 +27,13 @@ Saves the Keras model weights as an HDF5 file and the R metadata
 }
 \examples{
 \donttest{
-save_swrc_model(fit, dir = tempdir(), name = "model_5")
+if (reticulate::py_module_available("tensorflow")) {
+  df  <- prepare_swrc_data(swrc_example, depth_col = "depth")
+  fit <- fit_swrc(df,
+                  x_inputs = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+                  epochs = 2L, verbose = FALSE)
+  save_swrc_model(fit, dir = tempdir(), name = "model_test")
+}
 }
 
 }

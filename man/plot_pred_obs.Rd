@@ -50,8 +50,11 @@ and optional regression line, optionally faceted by a grouping variable.
 }
 \examples{
 \donttest{
-df <- data.frame(theta_n = obs, theta_predicted = pred, Texture = grp)
-plot_pred_obs(df, group_col = "Texture")
+df_plot <- data.frame(
+  theta_n         = c(0.30, 0.25, 0.20, 0.15, 0.10),
+  theta_predicted = c(0.28, 0.26, 0.22, 0.14, 0.11)
+)
+plot_pred_obs(df_plot)
 }
 
 }

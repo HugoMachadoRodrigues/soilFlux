@@ -37,7 +37,13 @@ across a dense grid of pF values and returns a tidy long-format tibble.
 }
 \examples{
 \donttest{
-dense <- predict_swrc_dense(fit, newdata = test_df, n_points = 500)
+if (reticulate::py_module_available("tensorflow")) {
+  df    <- prepare_swrc_data(swrc_example, depth_col = "depth")
+  fit   <- fit_swrc(df,
+                    x_inputs = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+                    epochs = 2L, verbose = FALSE)
+  dense <- predict_swrc_dense(fit, newdata = df, n_points = 50)
+}
 }
 
 }

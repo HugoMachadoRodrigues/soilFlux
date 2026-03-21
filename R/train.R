@@ -171,8 +171,12 @@ make_train_step <- function(theta_model, optimizer,
 #'
 #' @examples
 #' \donttest{
-#' fit <- fit_swrc(train_df, x_inputs = c("clay","silt","bd_gcm3","soc","Depth_num"),
-#'                val_df = val_df, epochs = 80, verbose = TRUE)
+#' if (reticulate::py_module_available("tensorflow")) {
+#'   df  <- prepare_swrc_data(swrc_example, depth_col = "depth")
+#'   fit <- fit_swrc(df,
+#'                   x_inputs = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+#'                   epochs = 2L, verbose = FALSE)
+#' }
 #' }
 #'
 #' @export

@@ -37,9 +37,13 @@ NULL
 #'
 #' @examples
 #' \donttest{
-#' dense <- predict_swrc_dense(fit, newdata = test_df)
-#' plot_swrc(dense, obs_points = test_df,
-#'           facet_row = "Depth_label", facet_col = "Texture")
+#' pred_curves <- data.frame(
+#'   PEDON_ID = rep(c("P1", "P2"), each = 5),
+#'   pF       = rep(c(0, 1, 2, 3, 4), 2),
+#'   theta    = c(0.42, 0.36, 0.28, 0.18, 0.08,
+#'                0.38, 0.32, 0.25, 0.16, 0.07)
+#' )
+#' plot_swrc(pred_curves, group_col = "PEDON_ID")
 #' }
 #'
 #' @importFrom ggplot2 ggplot aes geom_path geom_point facet_grid
@@ -161,8 +165,11 @@ plot_swrc <- function(pred_curves,
 #'
 #' @examples
 #' \donttest{
-#' df <- data.frame(theta_n = obs, theta_predicted = pred, Texture = grp)
-#' plot_pred_obs(df, group_col = "Texture")
+#' df_plot <- data.frame(
+#'   theta_n         = c(0.30, 0.25, 0.20, 0.15, 0.10),
+#'   theta_predicted = c(0.28, 0.26, 0.22, 0.14, 0.11)
+#' )
+#' plot_pred_obs(df_plot)
 #' }
 #'
 #' @importFrom ggplot2 ggplot aes geom_point geom_abline geom_smooth
@@ -272,8 +279,10 @@ plot_pred_obs <- function(df,
 #'
 #' @examples
 #' \donttest{
-#' m1 <- swrc_metrics(obs, pred1) |> dplyr::mutate(model = "Model 1")
-#' m2 <- swrc_metrics(obs, pred2) |> dplyr::mutate(model = "Model 2")
+#' m1 <- swrc_metrics(c(0.30, 0.25, 0.20), c(0.28, 0.26, 0.22)) |>
+#'   dplyr::mutate(model = "Model 1")
+#' m2 <- swrc_metrics(c(0.30, 0.25, 0.20), c(0.29, 0.24, 0.21)) |>
+#'   dplyr::mutate(model = "Model 2")
 #' plot_swrc_metrics(dplyr::bind_rows(m1, m2))
 #' }
 #'

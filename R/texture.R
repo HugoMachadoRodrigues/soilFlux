@@ -114,11 +114,13 @@ add_texture <- function(df,
 #'
 #' @examples
 #' \donttest{
-#' df <- data.frame(sand_total = c(70, 20, 10),
-#'                  silt = c(15, 50, 30),
-#'                  clay = c(15, 30, 60),
-#'                  Texture = c("Sand", "Silt Loam", "Clay"))
-#' texture_triangle(df, color_col = "Texture")
+#' if (requireNamespace("ggtern", quietly = TRUE)) {
+#'   df <- data.frame(sand_total = c(70, 20, 10),
+#'                    silt = c(15, 50, 30),
+#'                    clay = c(15, 30, 60),
+#'                    Texture = c("Sand", "Silt Loam", "Clay"))
+#'   p <- texture_triangle(df, color_col = "Texture")
+#' }
 #' }
 #'
 #' @importFrom ggplot2 ggplot aes geom_point labs theme_bw theme

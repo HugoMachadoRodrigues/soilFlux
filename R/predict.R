@@ -28,9 +28,13 @@ NULL
 #'
 #' @examples
 #' \donttest{
-#' fit  <- fit_swrc(train_df, x_inputs = c("clay","silt","bd_gcm3","soc","Depth_num"),
-#'                 val_df = val_df)
-#' pred <- predict_swrc(fit, newdata = test_df)
+#' if (reticulate::py_module_available("tensorflow")) {
+#'   df   <- prepare_swrc_data(swrc_example, depth_col = "depth")
+#'   fit  <- fit_swrc(df,
+#'                    x_inputs = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+#'                    epochs = 2L, verbose = FALSE)
+#'   pred <- predict_swrc(fit, newdata = df)
+#' }
 #' }
 #'
 #' @export
@@ -97,7 +101,13 @@ predict_swrc <- function(object, newdata, pf = NULL, heads = NULL, ...) {
 #'
 #' @examples
 #' \donttest{
-#' dense <- predict_swrc_dense(fit, newdata = test_df, n_points = 500)
+#' if (reticulate::py_module_available("tensorflow")) {
+#'   df    <- prepare_swrc_data(swrc_example, depth_col = "depth")
+#'   fit   <- fit_swrc(df,
+#'                     x_inputs = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+#'                     epochs = 2L, verbose = FALSE)
+#'   dense <- predict_swrc_dense(fit, newdata = df, n_points = 50)
+#' }
 #' }
 #'
 #' @importFrom dplyr group_by summarise across all_of ungroup
