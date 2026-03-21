@@ -92,10 +92,13 @@ A `ggplot` object.
 
 ``` r
 # \donttest{
-dense <- predict_swrc_dense(fit, newdata = test_df)
-#> Error: object 'fit' not found
-plot_swrc(dense, obs_points = test_df,
-          facet_row = "Depth_label", facet_col = "Texture")
-#> Error: object 'dense' not found
+pred_curves <- data.frame(
+  PEDON_ID = rep(c("P1", "P2"), each = 5),
+  pF       = rep(c(0, 1, 2, 3, 4), 2),
+  theta    = c(0.42, 0.36, 0.28, 0.18, 0.08,
+               0.38, 0.32, 0.25, 0.16, 0.07)
+)
+plot_swrc(pred_curves, group_col = "PEDON_ID")
+
 # }
 ```

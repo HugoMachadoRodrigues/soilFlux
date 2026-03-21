@@ -88,7 +88,5 @@ mod <- build_swrc_model(n_covariates = 9L)
 #> 
 #> 
 #> You can install TensorFlow using the install_tensorflow() function.
-mod$theta_model$summary()
-#> Error: object 'mod' not found
 # }
 ```

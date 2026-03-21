@@ -132,8 +132,14 @@ and a <code>pF</code> column.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="va">sets</span> <span class="op">&lt;-</span> <span class="fu">build_residual_sets</span><span class="op">(</span><span class="va">train_df</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"clay"</span>,<span class="st">"silt"</span>,<span class="st">"sand_total"</span>,<span class="st">"Depth_num"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'train_df' not found</span>
+<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  clay       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">20</span>, <span class="fl">30</span>, <span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  silt       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">40</span>, <span class="fl">20</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  sand_total <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">30</span>, <span class="fl">70</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  Depth_num  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">15</span>, <span class="fl">30</span>, <span class="fl">60</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sets</span> <span class="op">&lt;-</span> <span class="fu">build_residual_sets</span><span class="op">(</span><span class="va">df</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"clay"</span>, <span class="st">"silt"</span>, <span class="st">"sand_total"</span>, <span class="st">"Depth_num"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                            S1 <span class="op">=</span> <span class="fl">50L</span>, S2 <span class="op">=</span> <span class="fl">20L</span>, S3 <span class="op">=</span> <span class="fl">20L</span>, S4 <span class="op">=</span> <span class="fl">50L</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

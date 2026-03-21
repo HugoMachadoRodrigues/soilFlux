@@ -47,11 +47,11 @@ A `ggplot` object.
 
 ``` r
 # \donttest{
-m1 <- swrc_metrics(obs, pred1) |> dplyr::mutate(model = "Model 1")
-#> Error: object 'obs' not found
-m2 <- swrc_metrics(obs, pred2) |> dplyr::mutate(model = "Model 2")
-#> Error: object 'obs' not found
+m1 <- swrc_metrics(c(0.30, 0.25, 0.20), c(0.28, 0.26, 0.22)) |>
+  dplyr::mutate(model = "Model 1")
+m2 <- swrc_metrics(c(0.30, 0.25, 0.20), c(0.29, 0.24, 0.21)) |>
+  dplyr::mutate(model = "Model 2")
 plot_swrc_metrics(dplyr::bind_rows(m1, m2))
-#> Error: object 'm1' not found
+
 # }
 ```

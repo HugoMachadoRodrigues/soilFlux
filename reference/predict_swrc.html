@@ -88,11 +88,13 @@ in <code>newdata</code>.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="va">fit</span>  <span class="op">&lt;-</span> <span class="fu"><a href="fit_swrc.html">fit_swrc</a></span><span class="op">(</span><span class="va">train_df</span>, x_inputs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"clay"</span>,<span class="st">"silt"</span>,<span class="st">"bd_gcm3"</span>,<span class="st">"soc"</span>,<span class="st">"Depth_num"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                val_df <span class="op">=</span> <span class="va">val_df</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'train_df' not found</span>
-<span class="r-in"><span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">predict_swrc</span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="va">test_df</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'fit' not found</span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_module_available.html" class="external-link">py_module_available</a></span><span class="op">(</span><span class="st">"tensorflow"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">df</span>   <span class="op">&lt;-</span> <span class="fu"><a href="prepare_swrc_data.html">prepare_swrc_data</a></span><span class="op">(</span><span class="va">swrc_example</span>, depth_col <span class="op">=</span> <span class="st">"depth"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">fit</span>  <span class="op">&lt;-</span> <span class="fu"><a href="fit_swrc.html">fit_swrc</a></span><span class="op">(</span><span class="va">df</span>,</span></span>
+<span class="r-in"><span>                   x_inputs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"clay"</span>, <span class="st">"silt"</span>, <span class="st">"bd_gcm3"</span>, <span class="st">"soc"</span>, <span class="st">"Depth_num"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                   epochs <span class="op">=</span> <span class="fl">2L</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu">predict_swrc</span><span class="op">(</span><span class="va">fit</span>, newdata <span class="op">=</span> <span class="va">df</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

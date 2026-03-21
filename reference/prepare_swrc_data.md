@@ -64,8 +64,19 @@ maximum theta).
 
 ``` r
 # \donttest{
-df_prep <- prepare_swrc_data(raw_df,
-  x_cols = c(PEDON_ID = "ID", sand = "sand_pct", ...))
-#> Error: object 'raw_df' not found
+df <- data.frame(
+  ID           = rep("P01", 3),
+  sand_pct     = c(50, 50, 50),
+  silt         = c(30, 30, 30),
+  clay         = c(20, 20, 20),
+  soc          = c(1.2, 1.2, 1.2),
+  bd_gcc       = c(1.3, 1.3, 1.3),
+  matric_head  = c(10, 100, 1000),
+  theta        = c(0.40, 0.30, 0.20),
+  depth        = c("0-30", "0-30", "0-30")
+)
+df_prep <- prepare_swrc_data(df,
+  x_cols = c(PEDON_ID = "ID", sand = "sand_pct", bd = "bd_gcc",
+             water_content = "theta"))
 # }
 ```

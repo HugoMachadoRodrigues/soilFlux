@@ -30,9 +30,13 @@ A `swrc_fit` object (without `history` or `param_model`).
 
 ``` r
 # \donttest{
-fit <- load_swrc_model(tempdir(), "model_5")
-#> Error in load_swrc_model(tempdir(), "model_5"): Weights file not found: /tmp/RtmpLpxlIc/model_5.weights.h5
-pred <- predict_swrc(fit, newdata = test_df)
-#> Error: object 'fit' not found
+if (reticulate::py_module_available("tensorflow")) {
+  df  <- prepare_swrc_data(swrc_example, depth_col = "depth")
+  fit <- fit_swrc(df,
+                  x_inputs = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+                  epochs = 2L, verbose = FALSE)
+  save_swrc_model(fit, dir = tempdir(), name = "model_test")
+  fit2 <- load_swrc_model(tempdir(), "model_test")
+}
 # }
 ```

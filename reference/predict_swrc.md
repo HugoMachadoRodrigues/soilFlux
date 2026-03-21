@@ -46,10 +46,12 @@ A numeric vector of predicted theta values (m3/m3), one per row in
 
 ``` r
 # \donttest{
-fit  <- fit_swrc(train_df, x_inputs = c("clay","silt","bd_gcm3","soc","Depth_num"),
-                val_df = val_df)
-#> Error: object 'train_df' not found
-pred <- predict_swrc(fit, newdata = test_df)
-#> Error: object 'fit' not found
+if (reticulate::py_module_available("tensorflow")) {
+  df   <- prepare_swrc_data(swrc_example, depth_col = "depth")
+  fit  <- fit_swrc(df,
+                   x_inputs = c("clay", "silt", "bd_gcm3", "soc", "Depth_num"),
+                   epochs = 2L, verbose = FALSE)
+  pred <- predict_swrc(fit, newdata = df)
+}
 # }
 ```

@@ -89,7 +89,13 @@ column.
 
 ``` r
 # \donttest{
-sets <- build_residual_sets(train_df, c("clay","silt","sand_total","Depth_num"))
-#> Error: object 'train_df' not found
+df <- data.frame(
+  clay       = c(20, 30, 10),
+  silt       = c(30, 40, 20),
+  sand_total = c(50, 30, 70),
+  Depth_num  = c(15, 30, 60)
+)
+sets <- build_residual_sets(df, c("clay", "silt", "sand_total", "Depth_num"),
+                            S1 = 50L, S2 = 20L, S3 = 20L, S4 = 50L)
 # }
 ```

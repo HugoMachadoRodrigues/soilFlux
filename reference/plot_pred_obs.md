@@ -70,9 +70,11 @@ A `ggplot` object.
 
 ``` r
 # \donttest{
-df <- data.frame(theta_n = obs, theta_predicted = pred, Texture = grp)
-#> Error: object 'obs' not found
-plot_pred_obs(df, group_col = "Texture")
-#> Error in plot_pred_obs(df, group_col = "Texture"): is.data.frame(df) is not TRUE
+df_plot <- data.frame(
+  theta_n         = c(0.30, 0.25, 0.20, 0.15, 0.10),
+  theta_predicted = c(0.28, 0.26, 0.22, 0.14, 0.11)
+)
+plot_pred_obs(df_plot)
+
 # }
 ```
