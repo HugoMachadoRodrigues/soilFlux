@@ -31,7 +31,7 @@ A `swrc_fit` object (without `history` or `param_model`).
 ``` r
 # \donttest{
 fit <- load_swrc_model(tempdir(), "model_5")
-#> Error in load_swrc_model(tempdir(), "model_5"): Weights file not found: /tmp/Rtmp7OsHeB/model_5.weights.h5
+#> Error in load_swrc_model(tempdir(), "model_5"): Weights file not found: /tmp/RtmpLpxlIc/model_5.weights.h5
 pred <- predict_swrc(fit, newdata = test_df)
 #> Error: object 'fit' not found
 # }
