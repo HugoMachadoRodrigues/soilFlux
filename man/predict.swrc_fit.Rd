@@ -21,6 +21,10 @@ training (i.e. \code{object$x_inputs}).  Must have a \code{matric_head} column
 
 \item{...}{Ignored.}
 }
+\value{
+A numeric vector of predicted volumetric water content values
+(m3/m3), one per row in \code{newdata}.
+}
 \description{
 Dispatches to \code{\link[=predict_swrc]{predict_swrc()}}.
 }

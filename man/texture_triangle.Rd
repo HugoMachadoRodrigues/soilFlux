@@ -41,7 +41,7 @@ Creates a ternary diagram coloured by a grouping variable using
 \code{ggplot2}.  Requires the \code{ggtern} package (not a hard dependency).
 }
 \examples{
-\dontrun{
+\donttest{
 df <- data.frame(sand_total = c(70, 20, 10),
                  silt = c(15, 50, 30),
                  clay = c(15, 30, 60),

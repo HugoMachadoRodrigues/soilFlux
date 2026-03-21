@@ -34,7 +34,7 @@ Creates a bar chart comparing R², RMSE, and MAE across multiple models
 or configurations.
 }
 \examples{
-\dontrun{
+\donttest{
 m1 <- swrc_metrics(obs, pred1) |> dplyr::mutate(model = "Model 1")
 m2 <- swrc_metrics(obs, pred2) |> dplyr::mutate(model = "Model 2")
 plot_swrc_metrics(dplyr::bind_rows(m1, m2))

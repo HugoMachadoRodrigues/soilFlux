@@ -46,7 +46,7 @@ A convenience wrapper that:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 df_prep <- prepare_swrc_data(raw_df,
   x_cols = c(PEDON_ID = "ID", sand = "sand_pct", ...))
 }

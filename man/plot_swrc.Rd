@@ -65,7 +65,7 @@ Creates a \code{ggplot2} figure showing continuous SWRC predictions
 (lines) optionally overlaid with observed data points.
 }
 \examples{
-\dontrun{
+\donttest{
 dense <- predict_swrc_dense(fit, newdata = test_df)
 plot_swrc(dense, obs_points = test_df,
           facet_row = "Depth_label", facet_col = "Texture")

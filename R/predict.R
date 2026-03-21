@@ -3,6 +3,8 @@
 #' @description Functions for generating soil water content predictions
 #'   from a fitted `swrc_fit` object, both at specific pF points and as
 #'   dense continuous curves.
+#' @return See [predict_swrc()] and [predict_swrc_dense()] for return value
+#'   details.
 NULL
 
 #' Predict water content at specific pF or matric-head values
@@ -25,7 +27,7 @@ NULL
 #'   in `newdata`.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' fit  <- fit_swrc(train_df, x_inputs = c("clay","silt","bd_gcm3","soc","Depth_num"),
 #'                 val_df = val_df)
 #' pred <- predict_swrc(fit, newdata = test_df)
@@ -94,7 +96,7 @@ predict_swrc <- function(object, newdata, pf = NULL, heads = NULL, ...) {
 #'   in m3/m3).
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' dense <- predict_swrc_dense(fit, newdata = test_df, n_points = 500)
 #' }
 #'
@@ -211,6 +213,8 @@ predict_theta_s <- function(object, newdata) {
 #' Dispatches to [predict_swrc()].
 #'
 #' @inheritParams predict_swrc
+#' @return A numeric vector of predicted volumetric water content values
+#'   (m3/m3), one per row in `newdata`.
 #' @export
 predict.swrc_fit <- function(object, newdata, pf = NULL, heads = NULL, ...) {
   predict_swrc(object, newdata = newdata, pf = pf, heads = heads, ...)

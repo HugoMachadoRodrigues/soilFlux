@@ -36,7 +36,7 @@ For each unique (PEDON_ID × depth) profile in \code{newdata}, predicts theta
 across a dense grid of pF values and returns a tidy long-format tibble.
 }
 \examples{
-\dontrun{
+\donttest{
 dense <- predict_swrc_dense(fit, newdata = test_df, n_points = 500)
 }
 

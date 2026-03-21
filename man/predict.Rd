@@ -3,6 +3,10 @@
 \name{predict}
 \alias{predict}
 \title{Prediction from fitted SWRC models}
+\value{
+See \code{\link[=predict_swrc]{predict_swrc()}} and \code{\link[=predict_swrc_dense]{predict_swrc_dense()}} for return value
+details.
+}
 \description{
 Functions for generating soil water content predictions
 from a fitted \code{swrc_fit} object, both at specific pF points and as

@@ -170,7 +170,7 @@ make_train_step <- function(theta_model, optimizer,
 #'   }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' fit <- fit_swrc(train_df, x_inputs = c("clay","silt","bd_gcm3","soc","Depth_num"),
 #'                val_df = val_df, epochs = 80, verbose = TRUE)
 #' }
@@ -381,6 +381,8 @@ fit_swrc <- function(train_df,
 #' Print method for swrc_fit
 #' @param x An `swrc_fit` object.
 #' @param ... Ignored.
+#' @return Invisibly returns `x` (called for its side effect of printing a
+#'   summary of the fitted model to the console).
 #' @export
 print.swrc_fit <- function(x, ...) {
   cat("CNN1D SWRC fit (Norouzi et al. 2025)\n")
@@ -394,6 +396,9 @@ print.swrc_fit <- function(x, ...) {
 #' Summary method for swrc_fit
 #' @param object An `swrc_fit` object.
 #' @param ... Ignored.
+#' @return Invisibly returns `object` (called for its side effect of printing
+#'   a detailed summary including covariates, training parameters, and loss
+#'   weights to the console).
 #' @export
 summary.swrc_fit <- function(object, ...) {
   cat("=== soilFlux: swrc_fit object ===\n")

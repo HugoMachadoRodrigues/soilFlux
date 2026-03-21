@@ -4,13 +4,13 @@
 \alias{save_swrc_model}
 \title{Save a fitted SWRC model to disk}
 \usage{
-save_swrc_model(fit, dir = "./models/swrc", name = "swrc_model")
+save_swrc_model(fit, dir, name = "swrc_model")
 }
 \arguments{
 \item{fit}{A \code{swrc_fit} object returned by \code{\link[=fit_swrc]{fit_swrc()}}.}
 
 \item{dir}{Directory where the model will be saved.  Created if it
-does not exist (default \code{"./models/swrc"}).}
+does not exist.}
 
 \item{name}{Stem name for the output files (default \code{"swrc_model"}).}
 }
@@ -26,8 +26,8 @@ Saves the Keras model weights as an HDF5 file and the R metadata
 (scalers, hyperparameters, etc.) as an \code{.rds} file inside \code{dir}.
 }
 \examples{
-\dontrun{
-save_swrc_model(fit, dir = "./models", name = "model_5")
+\donttest{
+save_swrc_model(fit, dir = tempdir(), name = "model_5")
 }
 
 }

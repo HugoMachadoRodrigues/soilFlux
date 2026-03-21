@@ -34,7 +34,7 @@ NULL
 #'   `theta_max_n` (per-profile maximum theta).
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' df_prep <- prepare_swrc_data(raw_df,
 #'   x_cols = c(PEDON_ID = "ID", sand = "sand_pct", ...))
 #' }

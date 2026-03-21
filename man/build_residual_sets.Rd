@@ -59,7 +59,7 @@ and associated pF values) used to evaluate the physics constraints during
 training.
 }
 \examples{
-\dontrun{
+\donttest{
 sets <- build_residual_sets(train_df, c("clay","silt","sand_total","Depth_num"))
 }
 

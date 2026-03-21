@@ -80,7 +80,7 @@ norouzi_lambdas <- function(config = c("norouzi", "smooth")) {
 #'   and a `pF` column.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' sets <- build_residual_sets(train_df, c("clay","silt","sand_total","Depth_num"))
 #' }
 #'

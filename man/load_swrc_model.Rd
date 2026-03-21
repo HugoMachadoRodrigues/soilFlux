@@ -21,8 +21,8 @@ and returns a \code{swrc_fit}-compatible list that can be passed to
 \code{\link[=predict_swrc]{predict_swrc()}}, \code{\link[=predict_swrc_dense]{predict_swrc_dense()}}, etc.
 }
 \examples{
-\dontrun{
-fit <- load_swrc_model("./models", "model_5")
+\donttest{
+fit <- load_swrc_model(tempdir(), "model_5")
 pred <- predict_swrc(fit, newdata = test_df)
 }
 

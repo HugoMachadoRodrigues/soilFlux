@@ -113,7 +113,7 @@ add_texture <- function(df,
 #' @return A `ggplot` object (or `ggtern` object if `ggtern` is available).
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' df <- data.frame(sand_total = c(70, 20, 10),
 #'                  silt = c(15, 50, 30),
 #'                  clay = c(15, 30, 60),

@@ -36,7 +36,7 @@ NULL
 #' @return A `ggplot` object.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' dense <- predict_swrc_dense(fit, newdata = test_df)
 #' plot_swrc(dense, obs_points = test_df,
 #'           facet_row = "Depth_label", facet_col = "Texture")
@@ -160,7 +160,7 @@ plot_swrc <- function(pred_curves,
 #' @return A `ggplot` object.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' df <- data.frame(theta_n = obs, theta_predicted = pred, Texture = grp)
 #' plot_pred_obs(df, group_col = "Texture")
 #' }
@@ -271,7 +271,7 @@ plot_pred_obs <- function(df,
 #' @return A `ggplot` object.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' m1 <- swrc_metrics(obs, pred1) |> dplyr::mutate(model = "Model 1")
 #' m2 <- swrc_metrics(obs, pred2) |> dplyr::mutate(model = "Model 2")
 #' plot_swrc_metrics(dplyr::bind_rows(m1, m2))

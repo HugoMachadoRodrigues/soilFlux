@@ -11,7 +11,7 @@ NULL
 #'
 #' @param fit  A `swrc_fit` object returned by [fit_swrc()].
 #' @param dir  Directory where the model will be saved.  Created if it
-#'   does not exist (default `"./models/swrc"`).
+#'   does not exist.
 #' @param name Stem name for the output files (default `"swrc_model"`).
 #'
 #' @return Invisibly returns a named list with paths to the two files:
@@ -21,13 +21,13 @@ NULL
 #'   }
 #'
 #' @examples
-#' \dontrun{
-#' save_swrc_model(fit, dir = "./models", name = "model_5")
+#' \donttest{
+#' save_swrc_model(fit, dir = tempdir(), name = "model_5")
 #' }
 #'
 #' @export
 save_swrc_model <- function(fit,
-                            dir  = "./models/swrc",
+                            dir,
                             name = "swrc_model") {
   stopifnot(inherits(fit, "swrc_fit"))
   dir.create(dir, showWarnings = FALSE, recursive = TRUE)
@@ -71,8 +71,8 @@ save_swrc_model <- function(fit,
 #' @return A `swrc_fit` object (without `history` or `param_model`).
 #'
 #' @examples
-#' \dontrun{
-#' fit <- load_swrc_model("./models", "model_5")
+#' \donttest{
+#' fit <- load_swrc_model(tempdir(), "model_5")
 #' pred <- predict_swrc(fit, newdata = test_df)
 #' }
 #'

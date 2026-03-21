@@ -115,7 +115,7 @@ residual sets, runs the training loop with early stopping, and returns
 a fitted object for prediction and evaluation.
 }
 \examples{
-\dontrun{
+\donttest{
 fit <- fit_swrc(train_df, x_inputs = c("clay","silt","bd_gcm3","soc","Depth_num"),
                val_df = val_df, epochs = 80, verbose = TRUE)
 }

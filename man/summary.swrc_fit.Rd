@@ -11,6 +11,11 @@
 
 \item{...}{Ignored.}
 }
+\value{
+Invisibly returns \code{object} (called for its side effect of printing
+a detailed summary including covariates, training parameters, and loss
+weights to the console).
+}
 \description{
 Summary method for swrc_fit
 }

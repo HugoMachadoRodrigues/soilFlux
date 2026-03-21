@@ -56,7 +56,7 @@ NULL
 #'   }
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' mod <- build_swrc_model(n_covariates = 9L)
 #' mod$theta_model$summary()
 #' }

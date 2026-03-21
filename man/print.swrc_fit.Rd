@@ -11,6 +11,10 @@
 
 \item{...}{Ignored.}
 }
+\value{
+Invisibly returns \code{x} (called for its side effect of printing a
+summary of the fitted model to the console).
+}
 \description{
 Print method for swrc_fit
 }

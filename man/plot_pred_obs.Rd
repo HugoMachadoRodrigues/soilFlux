@@ -49,7 +49,7 @@ Creates a scatter plot of predicted vs. observed theta with a 1:1 line
 and optional regression line, optionally faceted by a grouping variable.
 }
 \examples{
-\dontrun{
+\donttest{
 df <- data.frame(theta_n = obs, theta_predicted = pred, Texture = grp)
 plot_pred_obs(df, group_col = "Texture")
 }
