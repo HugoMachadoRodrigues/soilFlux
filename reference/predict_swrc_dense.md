@@ -49,7 +49,8 @@ m3/m3).
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 dense <- predict_swrc_dense(fit, newdata = test_df, n_points = 500)
-} # }
+#> Error: object 'fit' not found
+# }
 ```

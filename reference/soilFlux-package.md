@@ -24,9 +24,10 @@ from soil texture, organic carbon, bulk density, and depth.
 
 ### References
 
-Norouzi, A. M., et al. (2025). Physics-Informed Neural Networks for
-Estimating a Continuous Form of the Soil Water Retention Curve. *Journal
-of Hydrology*.
+Norouzi, A. M., et al. (2025). "Physics-Informed Neural Networks for
+Estimating a Continuous Form of the Soil Water Retention Curve." *Water
+Resources Research*.
+[doi:10.1029/2024WR038149](https://doi.org/10.1029/2024WR038149)
 
 ## See also
 

@@ -36,3 +36,8 @@ predict(object, newdata, pf = NULL, heads = NULL, ...)
 - ...:
 
   Ignored.
+
+## Value
+
+A numeric vector of predicted volumetric water content values (m3/m3),
+one per row in `newdata`.

@@ -88,7 +88,8 @@ column.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 sets <- build_residual_sets(train_df, c("clay","silt","sand_total","Depth_num"))
-} # }
+#> Error: object 'train_df' not found
+# }
 ```

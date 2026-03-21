@@ -18,3 +18,8 @@ print(x, ...)
 - ...:
 
   Ignored.
+
+## Value
+
+Invisibly returns `x` (called for its side effect of printing a summary
+of the fitted model to the console).

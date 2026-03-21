@@ -91,9 +91,11 @@ A `ggplot` object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 dense <- predict_swrc_dense(fit, newdata = test_df)
+#> Error: object 'fit' not found
 plot_swrc(dense, obs_points = test_df,
           facet_row = "Depth_label", facet_col = "Texture")
-} # }
+#> Error: object 'dense' not found
+# }
 ```

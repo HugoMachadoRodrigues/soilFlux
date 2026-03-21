@@ -46,9 +46,12 @@ A `ggplot` object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 m1 <- swrc_metrics(obs, pred1) |> dplyr::mutate(model = "Model 1")
+#> Error: object 'obs' not found
 m2 <- swrc_metrics(obs, pred2) |> dplyr::mutate(model = "Model 2")
+#> Error: object 'obs' not found
 plot_swrc_metrics(dplyr::bind_rows(m1, m2))
-} # }
+#> Error: object 'm1' not found
+# }
 ```

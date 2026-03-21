@@ -63,8 +63,32 @@ A named list:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 mod <- build_swrc_model(n_covariates = 9L)
+#> Downloading uv...
+#> Done!
+#> Hint: To use tensorflow with `py_require()`, call `py_require("tensorflow")` at the start of the R session
+#> Error: Valid installation of TensorFlow not found.
+#> 
+#> Python environments searched for 'tensorflow' package:
+#>  /home/runner/.cache/R/reticulate/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12
+#> 
+#> Python exception encountered:
+#>  Traceback (most recent call last):
+#>   File "/home/runner/work/_temp/Library/reticulate/python/rpytools/loader.py", line 122, in _find_and_load_hook
+#>     return _run_hook(name, _hook)
+#>            ^^^^^^^^^^^^^^^^^^^^^^
+#>   File "/home/runner/work/_temp/Library/reticulate/python/rpytools/loader.py", line 96, in _run_hook
+#>     module = hook()
+#>              ^^^^^^
+#>   File "/home/runner/work/_temp/Library/reticulate/python/rpytools/loader.py", line 120, in _hook
+#>     return _find_and_load(name, import_)
+#>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#> ModuleNotFoundError: No module named 'tensorflow'
+#> 
+#> 
+#> You can install TensorFlow using the install_tensorflow() function.
 mod$theta_model$summary()
-} # }
+#> Error: object 'mod' not found
+# }
 ```

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">soilFlux</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,9 +32,27 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/HugoMachadoRodrigues/soilFlux/blob/v0.1.4/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/HugoMachadoRodrigues/soilFlux/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.5" id="soilflux-015">soilFlux 0.1.5<a class="anchor" aria-label="anchor" href="#soilflux-015"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-cran-reviewer-requests-0-1-5">Bug fixes (CRAN reviewer requests)<a class="anchor" aria-label="anchor" href="#bug-fixes-cran-reviewer-requests-0-1-5"></a></h3>
+<ul><li>
+<strong>DESCRIPTION</strong>: removed single quotes around acronyms (<code>CNN1D-PINN</code>, <code>SWRC</code>, <code>pF</code>) — CRAN policy requires single quotes only for package/software names.</li>
+<li>
+<strong>DESCRIPTION</strong>: added <code>&lt;doi:10.1029/2024WR038149&gt;</code> link to the Norouzi et al.
+<ol start="2025" style="list-style-type: decimal"><li>reference; corrected journal name from <em>Journal of Hydrology</em> to <em>Water Resources Research</em>.</li>
+</ol></li>
+<li>
+<strong>Documentation</strong>: added missing <code>\value</code> tags to <code>predict.Rd</code>, <code>predict.swrc_fit.Rd</code>, <code>print.swrc_fit.Rd</code>, and <code>summary.swrc_fit.Rd</code>.</li>
+<li>
+<strong>Examples</strong>: replaced all <code>\dontrun{}</code> with <code>\donttest{}</code> throughout the package, as the examples can in principle be executed (they require TensorFlow, but are not inherently unrunnable).</li>
+<li>
+<strong>io.R</strong>: removed the default <code>dir = "./models/swrc"</code> path from <code><a href="../reference/save_swrc_model.html">save_swrc_model()</a></code> to comply with CRAN policy against writing to the user’s home filespace by default; updated examples to use <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.4" id="soilflux-014">soilFlux 0.1.4<a class="anchor" aria-label="anchor" href="#soilflux-014"></a></h2>
 <div class="section level3">

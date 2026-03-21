@@ -202,8 +202,9 @@ An S3 object of class `swrc_fit`, a named list containing:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 fit <- fit_swrc(train_df, x_inputs = c("clay","silt","bd_gcm3","soc","Depth_num"),
                val_df = val_df, epochs = 80, verbose = TRUE)
-} # }
+#> Error: object 'train_df' not found
+# }
 ```

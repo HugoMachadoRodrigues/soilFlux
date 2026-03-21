@@ -69,8 +69,10 @@ A `ggplot` object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 df <- data.frame(theta_n = obs, theta_predicted = pred, Texture = grp)
+#> Error: object 'obs' not found
 plot_pred_obs(df, group_col = "Texture")
-} # }
+#> Error in plot_pred_obs(df, group_col = "Texture"): is.data.frame(df) is not TRUE
+# }
 ```

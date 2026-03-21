@@ -59,11 +59,15 @@ A `ggplot` object (or `ggtern` object if `ggtern` is available).
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 df <- data.frame(sand_total = c(70, 20, 10),
                  silt = c(15, 50, 30),
                  clay = c(15, 30, 60),
                  Texture = c("Sand", "Silt Loam", "Clay"))
 texture_triangle(df, color_col = "Texture")
-} # }
+#> Error in ggplot2::geom_point(size = point_size, alpha = alpha): Problem while setting up geom.
+#> ℹ Error occurred in the 1st layer.
+#> Caused by error in `compute_geom_1()`:
+#> ! `geom_point()` requires the following missing aesthetics: x and y.
+# }
 ```

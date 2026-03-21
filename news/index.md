@@ -1,5 +1,27 @@
 # Changelog
 
+## soilFlux 0.1.5
+
+### Bug fixes (CRAN reviewer requests)
+
+- **DESCRIPTION**: removed single quotes around acronyms (`CNN1D-PINN`,
+  `SWRC`, `pF`) — CRAN policy requires single quotes only for
+  package/software names.
+- **DESCRIPTION**: added `<doi:10.1029/2024WR038149>` link to the
+  Norouzi et al.
+  2025. reference; corrected journal name from *Journal of Hydrology* to
+        *Water Resources Research*.
+- **Documentation**: added missing `\value` tags to `predict.Rd`,
+  `predict.swrc_fit.Rd`, `print.swrc_fit.Rd`, and `summary.swrc_fit.Rd`.
+- **Examples**: replaced all `\dontrun{}` with `\donttest{}` throughout
+  the package, as the examples can in principle be executed (they
+  require TensorFlow, but are not inherently unrunnable).
+- **io.R**: removed the default `dir = "./models/swrc"` path from
+  [`save_swrc_model()`](https://hugomachadorodrigues.github.io/soilFlux/reference/save_swrc_model.md)
+  to comply with CRAN policy against writing to the user’s home
+  filespace by default; updated examples to use
+  [`tempdir()`](https://rdrr.io/r/base/tempfile.html).
+
 ## soilFlux 0.1.4
 
 ### Bug fixes

@@ -18,3 +18,9 @@ summary(object, ...)
 - ...:
 
   Ignored.
+
+## Value
+
+Invisibly returns `object` (called for its side effect of printing a
+detailed summary including covariates, training parameters, and loss
+weights to the console).

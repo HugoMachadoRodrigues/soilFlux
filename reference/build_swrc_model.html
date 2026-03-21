@@ -21,7 +21,7 @@ covariates only.
 
     <a class="navbar-brand me-2" href="../index.html">soilFlux</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,7 @@ covariates only.
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Build the CNN1D monotone-integral SWRC model</h1>
-      <small class="dont-index">Source: <a href="https://github.com/HugoMachadoRodrigues/soilFlux/blob/v0.1.4/R/model.R" class="external-link"><code>R/model.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/HugoMachadoRodrigues/soilFlux/blob/main/R/model.R" class="external-link"><code>R/model.R</code></a></small>
       <div class="d-none name"><code>build_swrc_model.Rd</code></div>
     </div>
 
@@ -110,10 +110,34 @@ output shape <code>[N, 1]</code> (theta_s only).</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">build_swrc_model</span><span class="op">(</span>n_covariates <span class="op">=</span> <span class="fl">9L</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Downloading uv...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Done!</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Hint: To use tensorflow with `py_require()`, call `py_require("tensorflow")` at the start of the R session</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> Valid installation of TensorFlow not found.</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> Python environments searched for 'tensorflow' package:</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>  /home/runner/.cache/R/reticulate/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> Python exception encountered:</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>  Traceback (most recent call last):</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>   File "/home/runner/work/_temp/Library/reticulate/python/rpytools/loader.py", line 122, in _find_and_load_hook</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>     return _run_hook(name, _hook)</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>            ^^^^^^^^^^^^^^^^^^^^^^</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>   File "/home/runner/work/_temp/Library/reticulate/python/rpytools/loader.py", line 96, in _run_hook</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>     module = hook()</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>              ^^^^^^</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>   File "/home/runner/work/_temp/Library/reticulate/python/rpytools/loader.py", line 120, in _hook</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>     return _find_and_load(name, import_)</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> ModuleNotFoundError: No module named 'tensorflow'</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> You can install TensorFlow using the install_tensorflow() function.</span>
 <span class="r-in"><span><span class="va">mod</span><span class="op">$</span><span class="va">theta_model</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'mod' not found</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

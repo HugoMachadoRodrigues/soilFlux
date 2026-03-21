@@ -63,8 +63,9 @@ maximum theta).
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 df_prep <- prepare_swrc_data(raw_df,
   x_cols = c(PEDON_ID = "ID", sand = "sand_pct", ...))
-} # }
+#> Error: object 'raw_df' not found
+# }
 ```

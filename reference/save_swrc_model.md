@@ -6,7 +6,7 @@ Saves the Keras model weights as an HDF5 file and the R metadata
 ## Usage
 
 ``` r
-save_swrc_model(fit, dir = "./models/swrc", name = "swrc_model")
+save_swrc_model(fit, dir, name = "swrc_model")
 ```
 
 ## Arguments
@@ -18,8 +18,7 @@ save_swrc_model(fit, dir = "./models/swrc", name = "swrc_model")
 
 - dir:
 
-  Directory where the model will be saved. Created if it does not exist
-  (default `"./models/swrc"`).
+  Directory where the model will be saved. Created if it does not exist.
 
 - name:
 
@@ -40,7 +39,8 @@ Invisibly returns a named list with paths to the two files:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-save_swrc_model(fit, dir = "./models", name = "model_5")
-} # }
+# \donttest{
+save_swrc_model(fit, dir = tempdir(), name = "model_5")
+#> Error: object 'fit' not found
+# }
 ```
